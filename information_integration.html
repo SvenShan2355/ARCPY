@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>information_integration.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h2 id="%E5%AD%98%E9%87%8F%E5%9E%8B%E6%8E%A7%E8%A7%84">存量型控规</h2>
+<h3 id="%E6%8E%A7%E8%A7%84%E9%9C%80%E8%A6%81%E8%A7%A3%E5%86%B3%E7%9A%84%E9%97%AE%E9%A2%98">控规需要解决的问题</h3>
+<ol>
+<li>城市发展建设中公共利益的保障</li>
+<li>明确各利益主体在城市建设和发展中的责、权、利关系</li>
+<li>积极通过城市设计手段控制良好的城市空间环境</li>
+<li>为土地出让提供依据</li>
+</ol>
+<p><em>[1] 《城市详细规划统一技术措施》</em></p>
+<hr>
+<h3 id="%E5%AD%98%E9%87%8F%E5%9E%8B%E6%8E%A7%E8%A7%84%E4%B8%AD%E5%8F%AF%E8%83%BD%E9%81%87%E5%88%B0%E7%9A%84%E9%97%AE%E9%A2%98">存量型控规中可能遇到的问题</h3>
+<ol>
+<li>
+<p><strong>公共利益难以保障</strong></p>
+<ul>
+<li><strong>缺乏空间政治收益导致规划方案难以实施</strong></li>
+<li><strong>涉及公共利益的地块难以形成帕累托改进</strong>：控规单元划分不够合理导致涉及大型公共设施的地块回报较低，大型公共设施难以落地，上位规划难以落实</li>
+<li><strong>人均指标难以确定</strong>：指标调整受到现状制约，不同区域指标难以形成统一标准</li>
+</ul>
+</li>
+<li>
+<p><strong>利益分配难以平衡</strong></p>
+<ul>
+<li><strong>缺乏制衡</strong>：控规的实施必须面对已取得合法使用权的土地业主，涉及政府、市场主体以及公众等多利益主体，而更新改造时往往以利益冲突的形式表现出主体间的多种博弈，控规趋于简洁明了的指标体系表达则无法充分体现公平公正内涵。</li>
+<li><strong>交易成本高昂</strong>：对于存量用地而言，土地权属多半已成为既定事实，复杂的土地权属及不同主体的改造意愿不同导致土地流转成本高昂</li>
+</ul>
+</li>
+<li>
+<p><strong>难以实现有效管控</strong></p>
+<ul>
+<li><strong>控制缺失</strong>：对现状已形成地区，除明确发展诉求用地之外，尤其涉及产权复杂的城中村、老旧住区等，对于地块所在权属类型及权利人考虑较少，常见做法是规划指标维持现状或直接留白，无法形成合理管控。</li>
+<li><strong>基础信息复杂</strong>：用地结构类型繁多，需要区分掌握其中复杂多样的结构类型，研判不同类型存量土地的规划依据和调整方向，依据现有行政许可判断各宗地控规调整余地</li>
+<li><strong>地块破碎</strong>：存量用地的建设使用分散破碎，造成传统的控规编制方法与相关规定的不适应性。道路交通、配套服务设施、基础设施和公园绿地等城市公共设施难以按照相关技术规定及上位规划要求“落地”，导致以往形成的低水平发展格局长期以来难以改变。</li>
+<li><strong>事权划分困难</strong>：已有设施的改造涉及多个部门事权难以协商</li>
+</ul>
+</li>
+<li>
+<p><strong>无法提供土地交易依据</strong></p>
+<ul>
+<li><strong>规划延误</strong>：编制成果的严肃性与市场开发的多变性存在矛盾，控规输出的静态化控制指标与片区开发产生“时间差”，在后续控规编制修订时，出现“编而不批”等消极现象，使得控规一直处于编制阶段，无法有效发挥法定效力，对土地出让和城市建设造成“规划延误”。</li>
+</ul>
+</li>
+</ol>
+<p><em>[2] 邹兵.增量规划向存量规划转型:理论解析与实践应对[J].城市规划学刊,2015(05):12-19.DOI:10.16361/j.upf.201505001.
+[3] 王嘉.基于多主体利益平衡的深圳市城市更新规划实施机制研究[C].中国城市规划学会、贵阳市人民政府.新常态：传承与变革——2015中国城市规划年会论文集（11规划实施与管理）.
+[4] 杜雁.深圳法定图则编制十年历程[J].城市规划学刊,2010(01):104-108.
+[5] 陈昌勇，陈静．存量型控规的精细化编制方法探索 — 以佛山市控规编制实践为例[J]．规划师，2018(1)：120-125．
+[6] 蔡震.我国控制性详细规划的发展趋势与方向[D].清华大学,2004.
+[7] 吕慧芬.控制性详细规划实效性评价分析[D]. 西安建筑科技大学, 2005. P14
+[8] 赵燕菁. 城市规划的下一个三十年[J]. 北京规划建设, 2014(01期).</em></p>
+<hr>
+<h3 id="%E5%8F%AF%E8%83%BD%E7%9A%84%E6%96%B9%E6%B3%95">可能的方法</h3>
+<ol>
+<li><strong>供需互动</strong>——规划准备期
+<ul>
+<li>明确规划范围用地属性，对用地状态进行精细化管理（图）</li>
+<li>以供调需，择要发展：进行用地更新潜力分级评估</li>
+<li>通过经济分析因地制宜确定开发容量</li>
+<li>基于开发容量测算结果，结合控国土空间规划，对片区公共服务数量进行测算</li>
+<li>充分发挥已有设施的潜力，提升系统整体运行效率</li>
+</ul>
+</li>
+</ol>
+<p><img src="./pic/2-1.jfif" alt=""></p>
+<ol start="2">
+<li>
+<p><strong>分层编制、分级管控</strong>——片区统筹与上位规划衔接</p>
+<ul>
+<li>编制分区规划：建立总体规划与单元规划的“衔接桥梁”、建立政府公众与市场主体的“博弈平台”、引导空间增容与结构优化</li>
+<li>不以村为单位进行建设改造，形成与市场推动的城市化相适应的“城市和村民两方利益”，促进村民向市民转变，避免拆旧村建新村的情况</li>
+</ul>
+</li>
+<li>
+<p><strong>过程运作</strong>——规划编制过程</p>
+<ul>
+<li>动态维护
+<ul>
+<li>控规编制“自下而上”，通过整合多方需求形成方案</li>
+<li>政府强化统筹角色，在协调和平衡各方利益的基础上对开发建设行为进行管控，结合开发建设增加公共服务，确保公共利益不因市场行为受到损害</li>
+</ul>
+</li>
+<li>多元协同
+<ul>
+<li>关于底线形成共识：构建交流平台，在理清各层级政府和各方权限的基础上，通过专项报告的方式，明确需要共同遵守的刚性控制内容</li>
+<li>以本土文化为可识别资源，利用传统场所打造特色空间，构筑群体共识</li>
+<li>规划过程中调整各方利益：协作式规划
+<ul>
+<li>搭建多元主体协作平台，明确“规划引领，契约协作”的协作关系</li>
+<li>加强沟通协作，弱化政府的强制性管理 ，充分调动市场与社会的积极性</li>
+<li>强调多视角的切入，目标与问题双重导向统筹结合，制定有针对性的规划方案</li>
+<li>注重连续、渐进式的过程研究，有序推进规划实施</li>
+</ul>
+</li>
+<li>从“规划管控”到“规划治理”
+<ul>
+<li>实现从“规划”到“规则”的转变，增加规划的弹性</li>
+<li>与自上而下的管控不同，控规不能为旧城更新提供根本动力，规划需要通过技术引导，实现在底线管控的约束下的基层自治</li>
+<li>规划管理的重心必须向基层下移，必须赋予一层规划管理人员必要的自由裁量权</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<p><img src="./pic/1-1.jpg" alt=""></p>
+<ol start="4">
+<li><strong>精细化管控</strong>——规划管控方法
+<ul>
+<li>&quot;用地功能置换&quot;转变为&quot;建设容量功能置换&quot;，从“用地总量控制”转变为“建设总量控制”，通过容积率调整（奖励、转移等）实现利益平衡</li>
+<li>基于土地的使用属性的分类管控（图）
+<ul>
+<li>区分建设与非建设用地的管控边界</li>
+<li>区分公益性用地和经营性用地</li>
+<li>区分村庄用地和城市用地</li>
+<li>区分用地性质改变与否、用地上是否进行重新建设</li>
+<li>内容明确的刚性控制、处于动态变化状态的预留弹性</li>
+</ul>
+</li>
+<li>引导地块改造和公共服务配套的提升
+<ul>
+<li>对改造方向明确的地块，在不变更产权的情况下，通过补偿容积率和增加公共空间的平衡方式鼓励用地改造</li>
+<li>改造方向不确定的用地尝试增加“两可用地性质”</li>
+<li>满足总量控制要求的前提下，尊重现状产权和业主诉求，对地块进行细分组合</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<p><img src="./pic/2-2.jfif" alt=""></p>
+<ol start="5">
+<li><strong>寻找空间增值方法，提高各方利益，降低规划实施的交易成本</strong>——推进方案
+<ul>
+<li>关于交易成本：
+<ul>
+<li>增量规划可以简化为三个环节：<strong>征地、规划编制与基础设施建设开发、出让</strong>，其中涉及土地产权转让的第一步和第三步都是产权人和政府的交易，政府对土地市场的垄断决定了这个过程不是处于充分竞争的状态中，交易成本低。规划师介入的是第二步，规划过程中涉及的交易成本为0，可以按照相对理想的方式进行规划设计。</li>
+<li>存量规划也可以简化为三个环节：<strong>开发者从原产权人手中收购土地、拆除原有设施、二次开发</strong>，其中涉及土地产权转让的第一步和第三步都是多方交易，并不存在某一方处于绝对强势地位，存在复杂博弈过程，因此交易成本偏高。规划师所代表的政府方权力空间被压缩，角色向“协调者、仲裁者”转变。</li>
+</ul>
+</li>
+<li>一般来说，更新力度越大，空间收益越大，同时交易成本也越高，方案需要平衡成本和收益，降低交易成本的关键在于创建公平的对话环境，减少各方信息不对称性和投机行为
+<ul>
+<li>由“功能定用地”转向“用地调功能”，合理范围内尽可能减少对用地的调整，降低交易成本</li>
+<li>对土地进行空间细化再分类，按照已有或新增的资源对存量空间进行再组合，保障开发主体的利益，形成共同开发、多方共赢的新发展空间</li>
+<li>同类用地竞争力平衡、形成连贯的空间体验</li>
+<li>以宅基地地租为基础分配宅基地权益</li>
+</ul>
+</li>
+</ul>
+</li>
+</ol>
+<p><em>[2] 邹兵.增量规划向存量规划转型:理论解析与实践应对[J].城市规划学刊,2015(05):12-19.DOI:10.16361/j.upf.201505001.
+[5] 陈昌勇，陈静．存量型控规的精细化编制方法探索 — 以佛山市控规编制实践为例[J]．规划师，2018(1)：120-125
+[9] 袁媛，陈金城. 协作式规划在控制性详细规划中的应用研究
+[10] 夏林茂.北京市控规调整中的技术与政治性因素分析
+[11] 王波.浅谈城乡规划编制中的可操作性问题，科技咨询导报, 2007年28期
+[12] 郭丽,孙亮. 县城老城区控制性详细规划编制思路探讨——以龙山县老城区为例[C]//.持续发展 理性规划——2017中国城市规划年会论文集（15控制性详细规划）,2017:52-58.
+[13] 赵广英,李晨.国土空间规划体系下的详细规划技术改革思路[J].城市规划学刊,2019(04):37-46.DOI:10.16361/j.upf.201904005.</em></p>
+
+</body>
+</html>
