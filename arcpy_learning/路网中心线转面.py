@@ -188,5 +188,5 @@ def Model(centerline_path, buffer_distance, chamfer_distance, output_path):  # �
 
 if __name__ == '__main__':
     # 输入图层必须有"HCJL"和"DJJL"两个字段
-    Model(r"E:\DataBase_本地更新库\ZJ\湛江市国土空间规划0715\中心城区方案.gdb\路网中心线0721", "HCJL", "DJJL",
-          r"E:\DataBase_本地更新库\ZJ\湛江市国土空间规划0715\中心城区方案.gdb")
+    Model(r"E:\DataBase_本地更新库\ZJ\湛江市国土空间规划0715\散装数据\路网0721.gdb\路网中心线0721_开发边界内", "HCJL", "DJJL",
+          r"E:\DataBase_本地更新库\ZJ\湛江市国土空间规划0715\散装数据\路网0721.gdb")
