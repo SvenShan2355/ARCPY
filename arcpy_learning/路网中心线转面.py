@@ -8,7 +8,7 @@ from arcpy import analysis
 from arcpy import management
 
 
-def Model(centerline_path, output_path, buffer_distance, chamfer_distance):  # 模型
+def Model(centerline_path, interchanges, output_path, buffer_distance, chamfer_distance):  # 模型
     '''
     参数（中心线图层, 输出目录, 缓冲距离字段名称[缓冲距离为红线宽度的一半], 倒角距离字段名称）
     '''
@@ -25,7 +25,7 @@ def Model(centerline_path, output_path, buffer_distance, chamfer_distance):  # �
         arcpy.management.CreateFileGDB("C:\\", "TEMP_GDB", "CURRENT")
 
         # Process: 缓冲区 (缓冲区) (analysis)
-        Undissolve_roadsurface = os.path.join(output_path,"Undissolve_roadsurface")
+        Undissolve_roadsurface = os.path.join(output_path, "Undissolve_roadsurface")
         arcpy.analysis.Buffer(in_features=centerline_path, out_feature_class=Undissolve_roadsurface,
                               buffer_distance_or_field=buffer_distance, line_side="FULL", line_end_type="FLAT",
                               dissolve_option="NONE", dissolve_field=[], method="PLANAR")
@@ -169,7 +169,7 @@ def Model(centerline_path, output_path, buffer_distance, chamfer_distance):  # �
         print("complete Process: 空间连接 (空间连接) (analysis)")
 
         # Process: 选择 (5) (选择) (analysis)
-        Undetermined_Triangle_2 = os.path.join(output_path,"Undetermined_Triangle")
+        Undetermined_Triangle_2 = os.path.join(output_path, "Undetermined_Triangle")
         arcpy.analysis.Select(in_features=Undetermined_Triangle_check, out_feature_class=Undetermined_Triangle_2,
                               where_clause="Join_Count = 0")
         print("complete Process: 选择 (5) (选择) (analysis)")
@@ -181,9 +181,16 @@ def Model(centerline_path, output_path, buffer_distance, chamfer_distance):  # �
         print("complete Process: 选择 (6)  (analysis)")
 
         # Process: 合并 (management)
-        Triangle_output = os.path.join(output_path,"Triangle_output")
+        Triangle_output = os.path.join(output_path, "Triangle_output")
         arcpy.management.Merge(inputs=[Selected_Triangle1, Selected_Triangle_2], output=Triangle_output)
         print("complete Process: 合并 (management)")
+
+        Merge_Roads = "C:\\TEMP_GDB.gdb\\Merge_Road"
+        arcpy.management.Merge(inputs=[Triangle_output, Undissolve_roadsurface, interchanges], output=Merge_Roads)
+        print("complete Process: 合并 (management)")
+
+        output_roads = os.path.join(output_path, "output_roads")
+        arcpy.management.Dissolve(in_features=Merge_Roads, out_feature_class=output_roads)
 
         arcpy.management.Delete(r"C:\TEMP_GDB.gdb", '')
         print("清除缓存")
@@ -191,5 +198,6 @@ def Model(centerline_path, output_path, buffer_distance, chamfer_distance):  # �
 
 if __name__ == '__main__':
     # 输入图层必须有"HCJL"和"DJJL"两个字段
-    Model(r"D:\PL\DataBase_本地更新库\ZJ\湛江市国土空间规划0930\Database\中心城区方案.gdb\D_路网中心线合并整理20221021",
-          r"D:\PL\DataBase_本地更新库\ZJ\湛江市国土空间规划0930\Database\中心城区方案.gdb", "HCJL", "DJJL")
+    Model(r"E:\DataBase_本地更新库\湛江市国土空间规划1103\Database\中心城区方案.gdb\路网中心线20221111总规深度",
+          r"E:\DataBase_本地更新库\湛江市国土空间规划1103\Database\中心城区方案.gdb\立交节点1112",
+          r"E:\DataBase_本地更新库\湛江市国土空间规划1103\Output_Database.gdb", "HCJL", "DJJL")

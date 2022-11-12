@@ -8,9 +8,9 @@ from arcpy import analysis
 from arcpy import management
 
 
-def Model(bgdc, plan, road, range, output_path):  # 模型
+def Model(bgdc, plan, sea, road, range, output_path):  # 模型
     '''
-    参数（现状图层, 方案图层, 路网图层, 中心城区范围图层, 输出目录）
+    参数（现状图层, 方案图层, 用海图层, 路网图层, 中心城区范围图层, 输出目录）
     '''
 
     # To allow overwriting outputs change overwriteOutput option to True.
@@ -27,7 +27,11 @@ def Model(bgdc, plan, road, range, output_path):  # 模型
 
         clip1 = "C:\\TEMP_GDB.gdb\\clip1"
         arcpy.analysis.Clip(bgdc, range, clip1)
-        print("Process: 擦除方案范围外图斑")
+        print("Process: 擦除方案范围外现状用地图斑")
+
+        clip2="C:\\TEMP_GDB.gdb\\clip2"
+        arcpy.analysis.Clip(sea, range, clip2)
+        print("Process: 擦除方案范围外用海图斑")
 
         erase1 = "C:\\TEMP_GDB.gdb\\erase1"
         arcpy.analysis.Erase(clip1, plan, erase1)
@@ -80,16 +84,19 @@ def Model(bgdc, plan, road, range, output_path):  # 模型
         arcpy.management.Merge([erase1, plan], merge1, fms)
         print("Process: 合并规划范围")
 
+        merge2 = "C:\\TEMP_GDB.gdb\\merge2"
+        arcpy.management.Merge([merge1, sea], merge2)
+
         erase2 = "C:\\TEMP_GDB.gdb\\erase2"
-        arcpy.analysis.Erase(merge1, road, erase2)
+        arcpy.analysis.Erase(merge2, road, erase2)
         print("Process: 擦除道路")
 
-        merge2 = "C:\\TEMP_GDB.gdb\\merge2"
-        arcpy.management.Merge([erase2, road], merge2)
+        merge3 = "C:\\TEMP_GDB.gdb\\merge3"
+        arcpy.management.Merge([erase2, road], merge3)
         print("Process: 合并道路")
 
         output_name = os.path.join(output_path, "merged_plan")
-        arcpy.analysis.Clip(merge2, range, output_name)
+        arcpy.analysis.Clip(merge3, range, output_name)
         print("Process: 擦除方案范围外图斑")
 
         arcpy.management.AddField(output_name, field_name="着色", field_type="TEXT", field_length=4)
@@ -116,9 +123,9 @@ def color(DM):
 
 
 if __name__ == '__main__':
-    # 输入图层必须有"HCJL"和"DJJL"两个字段
     Model(r"E:\DataBase_共享总库\ZJ\06_现状细化数据\中心城区\2022.07.11现状图\001库\市辖区现状图.gdb\A变更调查2020海岸线内部分",
           r"E:\DataBase_本地更新库\湛江市国土空间规划1103\Database\中心城区方案.gdb\B中心城区方案20221107_到中心线",
-          r"E:\DataBase_本地更新库\湛江市国土空间规划1103\Database\中心城区方案.gdb\C路网面20221106",
+          r"E:\DataBase_共享总库\ZJ\05_各种规划\湛江市海洋分区规划成果20221111.gdb\用海分区",
+          r"E:\DataBase_本地更新库\湛江市国土空间规划1103\Output_Database.gdb\output_roads",
           r"E:\DataBase_本地更新库\湛江市国土空间规划1103\Database\中心城区方案.gdb\中心城区范围线20221104",
           r"E:\DataBase_本地更新库\湛江市国土空间规划1103\Output_Database.gdb")
