@@ -10,7 +10,7 @@ from arcpy import analysis
 
 def Hydrologic_Analysis(t_map, output_path, Terrestrial_area):  # 模型
     '''
-    参数（中心线图层, 输出目录, 缓冲距离字段名称[缓冲距离为红线宽度的一半], 倒角距离字段名称）
+    参数（）
     '''
 
     # To allow overwriting outputs change overwriteOutput option to True.
@@ -62,6 +62,6 @@ def Hydrologic_Analysis(t_map, output_path, Terrestrial_area):  # 模型
 
 if __name__ == '__main__':
 
-    Hydrologic_Analysis(r"D:\PL\DataBase_共享总库\ZJ\10_地形图\湛江地形图\Rectangle_#1_高程\Rectangle_#1_高程\Rectangle_#1_高程_Level_16.tif",
-                        r"D:\PL\DataBase_本地更新库\ZJ\湛江市国土空间规划0930\Output_Database.gdb",
-                        r"D:\PL\DataBase_本地更新库\ZJ\湛江市国土空间规划0930\湛江市国土空间规划.gdb\湛江陆域范围")
+    Hydrologic_Analysis(r"E:\DataBase_共享总库\ZJ\10_地形图\湛江地形图\地形图\地形图.tif",
+                        r"E:\DataBase_本地更新库\湛江市国土空间规划1103\Output_Database.gdb",
+                        r"E:\DataBase_本地更新库\湛江市国土空间规划1103\湛江市国土空间规划.gdb\湛江陆域范围")

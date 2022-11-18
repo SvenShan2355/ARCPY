@@ -124,8 +124,8 @@ def color(DM):
 
 if __name__ == '__main__':
     Model(r"E:\DataBase_共享总库\ZJ\06_现状细化数据\中心城区\2022.07.11现状图\001库\市辖区现状图.gdb\A变更调查2020海岸线内部分",
-          r"E:\DataBase_本地更新库\湛江市国土空间规划1103\Database\中心城区方案.gdb\B中心城区方案20221107_到中心线",
+          r"E:\DataBase_本地更新库\湛江市国土空间规划1103\Database\中心城区方案.gdb\B中心城区方案20221116_到中心线",
           r"E:\DataBase_共享总库\ZJ\05_各种规划\湛江市海洋分区规划成果20221111.gdb\用海分区",
           r"E:\DataBase_本地更新库\湛江市国土空间规划1103\Output_Database.gdb\output_roads",
-          r"E:\DataBase_本地更新库\湛江市国土空间规划1103\Database\中心城区方案.gdb\中心城区范围线20221104",
+          r"E:\DataBase_本地更新库\湛江市国土空间规划1103\Database\中心城区方案.gdb\中心城区范围线20221113",
           r"E:\DataBase_本地更新库\湛江市国土空间规划1103\Output_Database.gdb")
