@@ -11,6 +11,7 @@ from arcpy import management
 def Model(centerline_path, interchanges, output_path, buffer_distance, chamfer_distance):  # 模型
     '''
     参数（中心线图层, 输出目录, 缓冲距离字段名称[缓冲距离为红线宽度的一半], 倒角距离字段名称）
+    # 输入图层必须有"HCJL"和"DJJL"两个字段
     '''
 
     # To allow overwriting outputs change overwriteOutput option to True.
@@ -195,9 +196,3 @@ def Model(centerline_path, interchanges, output_path, buffer_distance, chamfer_d
         arcpy.management.Delete(r"C:\TEMP_GDB.gdb", '')
         print("清除缓存")
 
-
-if __name__ == '__main__':
-    # 输入图层必须有"HCJL"和"DJJL"两个字段
-    Model(r"E:\DataBase_本地更新库\湛江市国土空间规划1103\Database\中心城区方案.gdb\路网中心线20221111总规深度",
-          r"E:\DataBase_本地更新库\湛江市国土空间规划1103\Database\中心城区方案.gdb\立交节点1112",
-          r"E:\DataBase_本地更新库\湛江市国土空间规划1103\Output_Database.gdb", "HCJL", "DJJL")

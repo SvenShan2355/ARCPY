@@ -10,7 +10,7 @@ from arcpy import analysis
 
 def Hydrologic_Analysis(t_map, output_path, Terrestrial_area):  # 模型
     '''
-    参数（）
+    参数（地形图，输出目录，陆域范围）
     '''
 
     # To allow overwriting outputs change overwriteOutput option to True.
