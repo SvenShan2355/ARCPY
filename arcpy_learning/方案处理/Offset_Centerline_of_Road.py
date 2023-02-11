@@ -11,7 +11,6 @@ from arcpy import management
 def Model(centerline_path, interchanges, output_path, buffer_distance, chamfer_distance):  # 模型
     '''
     参数（中心线图层, 输出目录, 缓冲距离字段名称[缓冲距离为红线宽度的一半], 倒角距离字段名称）
-    # 输入图层必须有"HCJL"和"DJJL"两个字段
     '''
 
     # To allow overwriting outputs change overwriteOutput option to True.
@@ -25,9 +24,15 @@ def Model(centerline_path, interchanges, output_path, buffer_distance, chamfer_d
             workspace=r"C:\Users\Administrator\Documents\ArcGIS\Default.gdb"):
         arcpy.management.CreateFileGDB("C:\\", "TEMP_GDB", "CURRENT")
 
+        # 整合路网
+        road_carding1 = "C:\\TEMP_GDB.gdb\\road_carding"
+        arcpy.management.Dissolve(in_features=centerline_path, out_feature_class=road_carding1,
+                                  dissolve_field=[buffer_distance, chamfer_distance], statistics_fields=None,
+                                  multi_part="MULTI_PART", unsplit_lines="UNSPLIT_LINES")
+
         # Process: 缓冲区 (缓冲区) (analysis)
-        Undissolve_roadsurface = os.path.join(output_path, "Undissolve_roadsurface")
-        arcpy.analysis.Buffer(in_features=centerline_path, out_feature_class=Undissolve_roadsurface,
+        Undissolve_roadsurface = "C:\\TEMP_GDB.gdb\\Undissolve_roadsurface"
+        arcpy.analysis.Buffer(in_features=road_carding1, out_feature_class=Undissolve_roadsurface,
                               buffer_distance_or_field=buffer_distance, line_side="FULL", line_end_type="FLAT",
                               dissolve_option="NONE", dissolve_field=[], method="PLANAR")
         print("complete Process: 缓冲区 (缓冲区) (analysis)")
@@ -76,25 +81,37 @@ def Model(centerline_path, interchanges, output_path, buffer_distance, chamfer_d
                                 relationship="NO_RELATIONSHIPS")
         print("complete Process: 标识 (标识) (analysis)")
 
+        # 通过融合操作将同一组的点的倒角距离设置为两线倒角距离的均值
+        Dissolve_point = "C:\\TEMP_GDB.gdb\\Dissolve_point"
+        arcpy.analysis.PairwiseDissolve(in_features=Grouped_point, out_feature_class=Dissolve_point,
+                                        dissolve_field="FID_Group_buffer2",
+                                        statistics_fields=[[chamfer_distance, "MEAN"]], multi_part="SINGLE_PART")
+
         # Process: 缓冲区 (3) (缓冲区) (analysis)
         buffer_by_Chamfer_distance = "C:\\TEMP_GDB.gdb\\buffer_by_Chamfer_distance"
-        arcpy.analysis.Buffer(in_features=Grouped_point, out_feature_class=buffer_by_Chamfer_distance,
-                              buffer_distance_or_field=chamfer_distance, line_side="FULL", line_end_type="ROUND",
+        arcpy.analysis.Buffer(in_features=Dissolve_point, out_feature_class=buffer_by_Chamfer_distance,
+                              buffer_distance_or_field="MEAN_" + chamfer_distance, line_side="FULL",
+                              line_end_type="ROUND",
                               dissolve_option="NONE", dissolve_field=[], method="PLANAR")
         print("complete Process: 缓冲区 (3) (缓冲区) (analysis)")
 
         # Process: 标识 (3) (标识) (analysis)
         Selected_boundary_identity = "C:\\TEMP_GDB.gdb\\Selected_boundary_identity"
-        arcpy.analysis.Identity(in_features=Selected_boundary_with_road_attribute,
+        arcpy.analysis.Identity(in_features=Selected_boundary,
                                 identity_features=buffer_by_Chamfer_distance,
                                 out_feature_class=Selected_boundary_identity, join_attributes="ALL",
                                 cluster_tolerance="", relationship="NO_RELATIONSHIPS")
         print("complete Process: 标识 (3) (标识) (analysis)")
 
         # Process: 选择 (2) (选择) (analysis)
+        # Two_line = "C:\\TEMP_GDB.gdb\\Two_line"
+        # arcpy.analysis.Select(in_features=Selected_boundary_identity, out_feature_class=Two_line,
+        #                       where_clause="RIGHT_FID = RIGHT_FID_1")
+
+        # 由于不需要再选择每条路对应的缓冲距离，因此不再需要提前对路进行标识，通过被上一步缓冲圆的标识提取三角形双线
         Two_line = "C:\\TEMP_GDB.gdb\\Two_line"
         arcpy.analysis.Select(in_features=Selected_boundary_identity, out_feature_class=Two_line,
-                              where_clause="RIGHT_FID = RIGHT_FID_1")
+                              where_clause="FID_Group_buffer2 <> 0")
         print("complete Process: 选择 (2) (选择) (analysis)")
 
         # Process: 融合 (融合) (management)
@@ -170,7 +187,7 @@ def Model(centerline_path, interchanges, output_path, buffer_distance, chamfer_d
         print("complete Process: 空间连接 (空间连接) (analysis)")
 
         # Process: 选择 (5) (选择) (analysis)
-        Undetermined_Triangle_2 = os.path.join(output_path, "Undetermined_Triangle")
+        Undetermined_Triangle_2 = "C:\\TEMP_GDB.gdb\\Undetermined_Triangle1"
         arcpy.analysis.Select(in_features=Undetermined_Triangle_check, out_feature_class=Undetermined_Triangle_2,
                               where_clause="Join_Count = 0")
         print("complete Process: 选择 (5) (选择) (analysis)")
@@ -182,7 +199,7 @@ def Model(centerline_path, interchanges, output_path, buffer_distance, chamfer_d
         print("complete Process: 选择 (6)  (analysis)")
 
         # Process: 合并 (management)
-        Triangle_output = os.path.join(output_path, "Triangle_output")
+        Triangle_output = "C:\\TEMP_GDB.gdb\\Triangle_output"
         arcpy.management.Merge(inputs=[Selected_Triangle1, Selected_Triangle_2], output=Triangle_output)
         print("complete Process: 合并 (management)")
 
@@ -190,9 +207,8 @@ def Model(centerline_path, interchanges, output_path, buffer_distance, chamfer_d
         arcpy.management.Merge(inputs=[Triangle_output, Undissolve_roadsurface, interchanges], output=Merge_Roads)
         print("complete Process: 合并 (management)")
 
-        output_roads = os.path.join(output_path, "output_roads")
+        output_roads = os.path.join(output_path, "output_roads_d")
         arcpy.management.Dissolve(in_features=Merge_Roads, out_feature_class=output_roads)
 
-        arcpy.management.Delete(r"C:\TEMP_GDB.gdb", '')
-        print("清除缓存")
-
+        # arcpy.management.Delete(r"C:\TEMP_GDB.gdb", '')
+        # print("清除缓存")

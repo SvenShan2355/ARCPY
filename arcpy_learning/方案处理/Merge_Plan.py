@@ -218,19 +218,19 @@ def Model_For_Part_Entirety_Replace(bgdc, plan, sea, sea_range, road, range, ent
         plan_sea = "C:\\TEMP_GDB.gdb\\plan_sea"
         arcpy.analysis.Select(plan, plan_sea,
                               "YDYHEJLDM LIKE '18%' OR YDYHEJLDM LIKE '19%' OR YDYHEJLDM LIKE '20%' OR YDYHEJLDM LIKE '21%' OR YDYHEJLDM LIKE '22%' OR YDYHEJLDM LIKE '24%' ")
-        print("选择规划海域")
+        print("Process: 选择规划海域")
 
         erase_sea_range = "C:\\TEMP_GDB.gdb\\erase_sea_range"
         arcpy.analysis.Erase(merge1, sea_range, erase_sea_range)
-        print("擦除海岸线外规划")
+        print("Process: 擦除海岸线外规划")
 
         merge_plan_and_sea = "C:\\TEMP_GDB.gdb\\merge_plan_and_sea"
         arcpy.management.Merge([plan_sea, erase_sea_range], merge_plan_and_sea)
-        print("组合海岸线内规划和规划用海")
+        print("Process: 组合海岸线内规划和规划用海")
 
         old_sea_left = "C:\\TEMP_GDB.gdb\\old_sea_left"
         arcpy.analysis.Erase(sea, plan_sea, old_sea_left)
-        print("擦除已规划海域")
+        print("Process: 擦除已规划海域")
 
         merge2 = "C:\\TEMP_GDB.gdb\\merge2"
         arcpy.management.Merge([merge_plan_and_sea, old_sea_left], merge2)
@@ -269,7 +269,7 @@ def color(DM):
         erase3 = "C:\\TEMP_GDB.gdb\\erase3"
         arcpy.analysis.Erase(merge_plan1, entirety_replace_part, erase3)
 
-        output_name = os.path.join(output_path, "merged_plan")
+        output_name = os.path.join(output_path, "merged_plan1")
         arcpy.management.Merge([erase3, entirety_replace_part], output_name)
 
         arcpy.management.Delete(r"C:\TEMP_GDB.gdb", '')
