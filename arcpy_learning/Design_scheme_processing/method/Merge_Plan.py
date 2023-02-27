@@ -247,7 +247,13 @@ def Model_For_Part_Entirety_Replace(bgdc, plan, sea, sea_range, road, range, ent
         arcpy.analysis.Clip(merge3, range, merge_plan1)
         print("Process: 擦除方案范围外图斑")
 
+        erase3 = "C:\\TEMP_GDB.gdb\\erase3"
+        arcpy.analysis.Erase(merge_plan1, entirety_replace_part, erase3)
+
         arcpy.management.AddField(merge_plan1, field_name="COLOR", field_type="TEXT", field_length=4)
+
+        output_name = os.path.join(output_path, "merged_plan1")
+        arcpy.management.Merge([erase3, entirety_replace_part], output_name)
 
         color_codebook = """
 def color(DM):
@@ -263,14 +269,8 @@ def color(DM):
         return DM[:2]
         """
 
-        arcpy.management.CalculateField(merge_plan1, field="COLOR", expression="color(!YDYHEJLDM!)",
+        arcpy.management.CalculateField(output_name, field="COLOR", expression="color(!YDYHEJLDM!)",
                                         expression_type="PYTHON3", code_block=color_codebook)
-
-        erase3 = "C:\\TEMP_GDB.gdb\\erase3"
-        arcpy.analysis.Erase(merge_plan1, entirety_replace_part, erase3)
-
-        output_name = os.path.join(output_path, "merged_plan1")
-        arcpy.management.Merge([erase3, entirety_replace_part], output_name)
 
         arcpy.management.Delete(r"C:\TEMP_GDB.gdb", '')
         print("清除缓存")

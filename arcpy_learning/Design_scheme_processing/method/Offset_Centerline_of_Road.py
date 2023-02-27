@@ -210,5 +210,5 @@ def Model(centerline_path, interchanges, output_path, buffer_distance, chamfer_d
         output_roads = os.path.join(output_path, "output_roads_d")
         arcpy.management.Dissolve(in_features=Merge_Roads, out_feature_class=output_roads)
 
-        # arcpy.management.Delete(r"C:\TEMP_GDB.gdb", '')
-        # print("清除缓存")
+        arcpy.management.Delete(r"C:\TEMP_GDB.gdb", '')
+        print("清除缓存")

@@ -2,7 +2,7 @@
 """
 by Sven_SHAN  2022.11.07
 """
-from 方案处理 import Offset_Centerline_of_Road, Merge_Plan
+from 方案处理.method import Offset_Centerline_of_Road, Merge_Plan
 
 if __name__ == '__main__':
     Offset_Centerline_of_Road.Model(
