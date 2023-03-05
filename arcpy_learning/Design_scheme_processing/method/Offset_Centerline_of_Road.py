@@ -207,7 +207,7 @@ def Model(centerline_path, interchanges, output_path, buffer_distance, chamfer_d
         arcpy.management.Merge(inputs=[Triangle_output, Undissolve_roadsurface, interchanges], output=Merge_Roads)
         print("complete Process: 合并 (management)")
 
-        output_roads = os.path.join(output_path, "output_roads_d")
+        output_roads = os.path.join(output_path, "output_roads_20230301")
         arcpy.management.Dissolve(in_features=Merge_Roads, out_feature_class=output_roads)
 
         arcpy.management.Delete(r"C:\TEMP_GDB.gdb", '')
