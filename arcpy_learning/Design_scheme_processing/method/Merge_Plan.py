@@ -222,7 +222,7 @@ def Model_For_Part_Entirety_Replace(bgdc, plan, sea, sea_range, road, range, ent
         plan_by_jsyd = "C:\\TEMP_GDB.gdb\\plan_by_jsyd"
         arcpy.analysis.Identity(plan_by_kfbj, jsyd, plan_by_jsyd)
 
-        single_part_plan = os.path.join(output_path, "single_part_plan")
+        single_part_plan = "C:\\TEMP_GDB.gdb\\single_part_plan"
         arcpy.management.MultipartToSinglepart(plan_by_jsyd, single_part_plan)
 
         '''
@@ -302,7 +302,7 @@ def GHZT(ysdm, jsyd): # 通过用于替换的现状要素图层的图层要素�
 def YDYHFLDM(ydyh2,ydyh3):
     if ydyh3 in ['100103','110103']:
         return ydyh3
-    elif ydyh2[:2] in ['07','08','10','11','12','13','14']:
+    elif ydyh2[:2] in ['07','08','10','11','12','13','14','17','18','19','20','21','22']:
         return ydyh2
     else:
         return ydyh2[:2]
@@ -368,22 +368,24 @@ def czc(czcsx,ydyh,kfbj):
         if ydyh[:2] in ['07','08','09','10','11','12','13','14','16'] and ydyh not in ['0703','1002','1003']:
             return '10'
         elif ydyh[:2] == '15' or ydyh in ['1002','1003']:
-            return  '特殊'
+            return  None
         elif czcsx in ['20']:
             return '20'
         elif ydyh == '0703':
             return '10'
         else:
-            return ''
+            return None
     else:
         if czcsx == '20':
             return '20'
         elif ydyh[:2] == '15' or ydyh in ['1002','1003']:
-            return '特殊'
+            return None
         elif ydyh[:2] in ['07','08','09','10','11','13','14','16'] and ydyh not in ['1002','1003']:
             return '10'
+        elif ydyh in ['1201','1202','1203','1204']:
+            return None
         elif ydyh[:2] == '12':
-            return '区域'
+            return '10'
         else:
             return ''
         """
@@ -392,7 +394,7 @@ def czc(czcsx,ydyh,kfbj):
                                         code_block=czc_codebook)
         print("Process26/28: 补充城镇村属性码(CZCSX)")
 
-        complete_plan = os.path.join(output_path, "complete_plan")
+        complete_plan = os.path.join(output_path, "complete_plan_20230410")
         arcpy.management.AddField(single_part_plan, field_name="YDYHFLMC", field_type="TEXT", field_length=50)
         arcpy.MakeFeatureLayer_management(single_part_plan, "plan_lyr")
         arcpy.JoinField_management("plan_lyr", "YDYHFLDM", dm2name_table, "dm")
