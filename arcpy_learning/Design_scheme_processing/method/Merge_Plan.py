@@ -299,20 +299,22 @@ def GHZT(ysdm, jsyd): # 通过用于替换的现状要素图层的图层要素�
 
         arcpy.management.AddField(single_part_plan, field_name="YDYHFLDM", field_type="TEXT", field_length=10)
         YDYHFLDM_codebook = """
-def YDYHFLDM(ydyh2,ydyh3):
+def YDYHFLDM(ydyh2,ydyh3,kfbj):
     if ydyh3 in ['100103','110103']:
         return ydyh3
+    elif ydyh2 == '1207' and kfbj == 0: # 将开发边界外1207用地改为1201用地
+        return "1202"
     elif ydyh2[:2] in ['07','08','10','11','12','13','14','17','18','19','20','21','22']:
         return ydyh2
     else:
         return ydyh2[:2]
         """
         arcpy.management.CalculateField(single_part_plan, field="YDYHFLDM",
-                                        expression="YDYHFLDM(!YDYHEJLDM!,!YDYHSJLDM!)",
+                                        expression="YDYHFLDM(!YDYHEJLDM!,!YDYHSJLDM!,!kfbj!)",
                                         expression_type="PYTHON3", code_block=YDYHFLDM_codebook)
         print("Process23/28: 补充用地用海分类代码字段(YDYHFLDM)")
 
-        arcpy.management.CalculateField(single_part_plan, field="YSDM", expression="2090050245",
+        arcpy.management.CalculateField(single_part_plan, field="YSDM", expression="2090020630",
                                         expression_type="PYTHON3")
         xzqdm_codebook = """
 def xzqdm(xzqdm):
@@ -387,14 +389,14 @@ def czc(czcsx,ydyh,kfbj):
         elif ydyh[:2] == '12':
             return '10'
         else:
-            return ''
+            return None
         """
         arcpy.management.CalculateField(single_part_plan, field="CZCSX", expression="czc(!CZCSX1!,!YDYHFLDM!,!kfbj!)",
                                         expression_type="PYTHON3",
                                         code_block=czc_codebook)
         print("Process26/28: 补充城镇村属性码(CZCSX)")
 
-        complete_plan = os.path.join(output_path, "complete_plan_20230410")
+        complete_plan = os.path.join(output_path, "complete_plan_20230411_ku")
         arcpy.management.AddField(single_part_plan, field_name="YDYHFLMC", field_type="TEXT", field_length=50)
         arcpy.MakeFeatureLayer_management(single_part_plan, "plan_lyr")
         arcpy.JoinField_management("plan_lyr", "YDYHFLDM", dm2name_table, "dm")
@@ -410,5 +412,5 @@ def czc(czcsx,ydyh,kfbj):
                                      "DELETE_FIELDS")
         print("Process28/28: 清除多余字段")
 
-        arcpy.management.Delete(r"C:\TEMP_GDB.gdb", '')
-        print("Process: 清除缓存")
+    arcpy.management.Delete(r"C:\TEMP_GDB.gdb", '')
+    print("Process: 清除缓存")
