@@ -5,21 +5,22 @@ by Sven_SHAN  2022.11.07
 from Design_scheme_processing.method import Merge_Plan
 from Design_scheme_processing.method import Offset_Centerline_of_Road
 from Design_scheme_processing.method import eliminate_under_200
+import shutil
 
 if __name__ == '__main__':
     # 从中心线生成路网
     # Offset_Centerline_of_Road.Model(
-    #     r"E:\DataBase_本地更新库\湛江市国土空间规划\Database\中心城区方案.gdb\中心城区道路中心线20230324",
+    #     r"E:\DataBase_本地更新库\湛江市国土空间规划\Database\中心城区方案.gdb\中心城区道路中心线20230414",
     #     r"E:\DataBase_本地更新库\湛江市国土空间规划\Database\中心城区方案.gdb\立交节点0307",
     #     r"E:\DataBase_本地更新库\湛江市国土空间规划\Output_Database.gdb", "HCJL", "DJJL")
 
     # 合成方案
     Merge_Plan.Model_For_Part_Entirety_Replace(
-        bgdc=r"E:\DataBase_本地更新库\湛江市国土空间规划\湛江市国土空间规划.gdb\入库版现状20230327",
-        plan=r"E:\DataBase_本地更新库\湛江市国土空间规划\Database\中心城区方案.gdb\中心城区方案到中心线20230408",
+        bgdc=r"E:\DataBase_本地更新库\湛江市国土空间规划\湛江市国土空间规划.gdb\入库版现状20230403",
+        plan=r"E:\DataBase_本地更新库\湛江市国土空间规划\Database\中心城区方案.gdb\中心城区方案到中心线20230417",
         sea=r"E:\DataBase_本地更新库\湛江市国土空间规划\湛江市国土空间规划.gdb\中心城区海域分区20221126_字段精_Project",
         sea_range=r"E:\DataBase_本地更新库\湛江市国土空间规划\湛江市国土空间规划.gdb\E海域范围新",
-        road=r"E:\DataBase_本地更新库\湛江市国土空间规划\Output_Database.gdb\output_roads_20230328",
+        road=r"E:\DataBase_本地更新库\湛江市国土空间规划\Output_Database.gdb\output_roads_20230414",
         range=r"E:\DataBase_本地更新库\湛江市国土空间规划\Database\中心城区方案.gdb\中心城区范围线20221118",
         entirety_replace_part=r"",
         zone=r"E:\DataBase_共享总库\ZJ\0_基础数据总库\湛江市国土空间总体规划.gdb\B市辖区县级行政边界",

@@ -3,6 +3,7 @@
 by Sven_SHAN  2022.11.07
 """
 import os
+import shutil
 import arcpy
 from arcpy import analysis
 from arcpy import management
@@ -38,6 +39,7 @@ def Model_For_Part_Entirety_Replace(bgdc, plan, sea, sea_range, road, range, ent
         arcpy.analysis.Erase(road, yjjbnt, road_E)
         road_EE = "C:\\TEMP_GDB.gdb\\road_EE"
         arcpy.analysis.Erase(road_E, stbhhx, road_EE)
+        road_EE = road  # 规避生态红线和永农对道路的擦除
         print("Process: 擦除永农和生态红线内规划")
 
         '''
@@ -60,14 +62,30 @@ def Model_For_Part_Entirety_Replace(bgdc, plan, sea, sea_range, road, range, ent
         arcpy.analysis.Clip(road_EE, range, inside_ZXCQ_plan_road)
         print("Process4/28: 擦除中心城区范围外规划道路图斑")
 
+        inside_ZXCQ_current_sea = "C:\\TEMP_GDB.gdb\\inside_ZXCQ_current_sea"
+        arcpy.analysis.Select(inside_ZXCQ_current_land, inside_ZXCQ_current_sea,
+                              "YDYHYJLDM IN ('18', '19', '20', '21', '22', '24')")
+        inside_ZXCQ_unplanned_sea0 = "C:\\TEMP_GDB.gdb\\inside_ZXCQ_unplanned_sea0"
+        arcpy.analysis.Erase(inside_ZXCQ_current_sea, inside_ZXCQ_plan_sea, inside_ZXCQ_unplanned_sea0)
+        inside_ZXCQ_unplanned_sea = "C:\\TEMP_GDB.gdb\\inside_ZXCQ_unplanned_sea"
+        arcpy.analysis.Erase(inside_ZXCQ_unplanned_sea0, inside_ZXCQ_plan_land, inside_ZXCQ_unplanned_sea)
+
+        inside_ZXCQ_current_land1 = "C:\\TEMP_GDB.gdb\\inside_ZXCQ_current_land1"
+        arcpy.analysis.Select(inside_ZXCQ_current_land, inside_ZXCQ_current_land1,
+                              "YDYHYJLDM NOT IN ('18', '19', '20', '21', '22', '24')")
         inside_ZXCQ_unplanned_land = "C:\\TEMP_GDB.gdb\\inside_ZXCQ_unplanned_land"
-        arcpy.analysis.Erase(inside_ZXCQ_current_land, inside_ZXCQ_plan_land, inside_ZXCQ_unplanned_land)
+        arcpy.analysis.Erase(inside_ZXCQ_current_land1, inside_ZXCQ_plan_land, inside_ZXCQ_unplanned_land)
+
+        inside_ZXCQ_unplanned_land_and_sea = "C:\\TEMP_GDB.gdb\\inside_ZXCQ_unplanned_land_and_sea"
+        arcpy.management.Merge([inside_ZXCQ_unplanned_sea, inside_ZXCQ_unplanned_land],
+                               inside_ZXCQ_unplanned_land_and_sea)
+
         print("Process5/28: 中心城区范围内，提取保留现状部分图斑")
 
         inside_ZXCQ_Cland_and_Pland = "C:\\TEMP_GDB.gdb\\inside_ZXCQ_Cland_and_Pland"
         # 维护合并字段
         # Create the required FieldMap and FieldMappings objects
-        infile1 = inside_ZXCQ_unplanned_land
+        infile1 = inside_ZXCQ_unplanned_land_and_sea
         infile2 = inside_ZXCQ_plan_land
         fm_YDYHYJLDM = arcpy.FieldMap()
         fm_YDYHEJLDM = arcpy.FieldMap()
@@ -117,7 +135,7 @@ def Model_For_Part_Entirety_Replace(bgdc, plan, sea, sea_range, road, range, ent
         fms.addFieldMap(fm_YDYHSJLDM)
         fms.addFieldMap(fm_YSDM)
         print("Process6/28: 维护合并字段")
-        arcpy.management.Merge([inside_ZXCQ_unplanned_land, inside_ZXCQ_plan_land], inside_ZXCQ_Cland_and_Pland, fms)
+        arcpy.management.Merge([inside_ZXCQ_unplanned_land_and_sea, inside_ZXCQ_plan_land], inside_ZXCQ_Cland_and_Pland, fms)
         print("Process7/28: 将中心城区规划用地和现状保留用地合并")
 
         if plan_across_shoreline == 1:
@@ -356,7 +374,7 @@ def NI_codebook(ydyh):
         YD1004reset_codebook = """
 def NIR_codebook(ydyh):
     if ydyh in ['1004']:
-        return "100101"
+        return "1001"
     else:
         return ydyh
         """
@@ -396,7 +414,7 @@ def czc(czcsx,ydyh,kfbj):
                                         code_block=czc_codebook)
         print("Process26/28: 补充城镇村属性码(CZCSX)")
 
-        complete_plan = os.path.join(output_path, "complete_plan_20230411_ku")
+        complete_plan = os.path.join(output_path, "complete_plan_20230417_ku")
         arcpy.management.AddField(single_part_plan, field_name="YDYHFLMC", field_type="TEXT", field_length=50)
         arcpy.MakeFeatureLayer_management(single_part_plan, "plan_lyr")
         arcpy.JoinField_management("plan_lyr", "YDYHFLDM", dm2name_table, "dm")
@@ -411,6 +429,3 @@ def czc(czcsx,ydyh,kfbj):
                                      "FID_plan_by_kfbj;FID_plan_by_czc;FID_plan_by_zone;FID_inside_ZXCQ_plan_renew_road;ZONE;MERGE_SRC;FID_B市辖区县级行政边界;FID_变更调查2020乡村建设用地203;FID_封库城镇开发边界;FID_变更调查2020建设用地;ORIG_FID;id;dm;name;YSDM_1",
                                      "DELETE_FIELDS")
         print("Process28/28: 清除多余字段")
-
-    arcpy.management.Delete(r"C:\TEMP_GDB.gdb", '')
-    print("Process: 清除缓存")
