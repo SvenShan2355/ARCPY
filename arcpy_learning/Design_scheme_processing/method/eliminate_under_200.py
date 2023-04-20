@@ -49,9 +49,9 @@ def eliminate_under_200(input_file, styn, output_file, jsyd):
         nc = r'C:\\TEMP_GDB.gdb\\nc'
         fjs = r'C:\\TEMP_GDB.gdb\\fjs'
 
-        arcpy.analysis.Select(outside_styn, cz, r"CZCSX IN ('10', '区域', '特殊')")
-        arcpy.analysis.Select(outside_styn, nc, r"CZCSX IN ('20')")
-        arcpy.analysis.Select(outside_styn, fjs, r"CZCSX IN ('')")
+        arcpy.analysis.Select(outside_styn, cz, r"CZCSX = '10' Or ((YDYHFLDM LIKE '12%' Or YDYHFLDM LIKE '15%') And CZCSX IS NULL)")
+        arcpy.analysis.Select(outside_styn, nc, r"CZCSX = '20'")
+        arcpy.analysis.Select(outside_styn, fjs, r"CZCSX IS NULL AND YDYHFLDM NOT LIKE '12%' AND YDYHFLDM NOT LIKE '15%'")
 
         cz1 = r'C:\\TEMP_GDB.gdb\\cz1'
         cz2 = r'C:\\TEMP_GDB.gdb\\cz2'
@@ -113,22 +113,20 @@ def eliminate_under_200(input_file, styn, output_file, jsyd):
         arcpy.management.Merge([cz3, nc3, fjs3], stynw)
         print(4)
 
-        arcpy.analysis.Select(stynw, cover, where_clause="(CZCSX1 = '20' or CZCSX = '') And Shape_Area > 200.05")
+        # arcpy.analysis.Select(stynw, cover, where_clause="(CZCSX1 = '20' or CZCSX = '') And Shape_Area > 200.05")
+        #
+        # arcpy.management.MakeFeatureLayer(stynw, 'stynw')
+        # arcpy.management.SelectLayerByAttribute('stynw', "NEW_SELECTION", sql_under_200)
+        # arcpy.management.Eliminate('stynw', stynw1, "LENGTH", ex_where_clause = ex_sql, ex_features=cover)
+        #
+        # arcpy.management.MakeFeatureLayer(stynw1, 'stynw1')
+        # arcpy.management.SelectLayerByAttribute('stynw1', "NEW_SELECTION", sql_under_200)
+        # arcpy.management.Eliminate('stynw1', stynw2, "LENGTH", ex_where_clause=ex_sql, ex_features=cover)
+        #
+        # arcpy.management.MakeFeatureLayer(stynw2, 'stynw2')
+        # arcpy.management.SelectLayerByAttribute('stynw2', "NEW_SELECTION", sql_under_200)
+        # arcpy.management.Eliminate('stynw2', stynw3, "LENGTH", ex_where_clause=ex_sql, ex_features=cover)
+        # print(5)
 
-        arcpy.management.MakeFeatureLayer(stynw, 'stynw')
-        arcpy.management.SelectLayerByAttribute('stynw', "NEW_SELECTION", sql_under_200)
-        arcpy.management.Eliminate('stynw', stynw1, "LENGTH", ex_where_clause = ex_sql, ex_features=cover)
+        arcpy.management.Merge([stynw, inside_styn3], output_file)
 
-        arcpy.management.MakeFeatureLayer(stynw1, 'stynw1')
-        arcpy.management.SelectLayerByAttribute('stynw1', "NEW_SELECTION", sql_under_200)
-        arcpy.management.Eliminate('stynw1', stynw2, "LENGTH", ex_where_clause=ex_sql, ex_features=cover)
-
-        arcpy.management.MakeFeatureLayer(stynw2, 'stynw2')
-        arcpy.management.SelectLayerByAttribute('stynw2', "NEW_SELECTION", sql_under_200)
-        arcpy.management.Eliminate('stynw2', stynw3, "LENGTH", ex_where_clause=ex_sql, ex_features=cover)
-        print(5)
-
-        arcpy.management.Merge([stynw3, inside_styn3], output_file)
-
-    arcpy.management.Delete(r"C:\TEMP_GDB.gdb", '')
-    print("Process: 清除缓存")

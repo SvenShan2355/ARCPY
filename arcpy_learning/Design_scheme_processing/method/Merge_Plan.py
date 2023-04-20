@@ -23,7 +23,8 @@ def Model_For_Part_Entirety_Replace(bgdc, plan, sea, sea_range, road, range, ent
     with arcpy.EnvManager(
             cartographicCoordinateSystem="PROJCS[\"CGCS2000_3_Degree_GK_Zone_37\",GEOGCS[\"GCS_China_Geodetic_Coordinate_System_2000\",DATUM[\"D_China_2000\",SPHEROID[\"CGCS2000\",6378137.0,298.257222101]],PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433]],PROJECTION[\"Gauss_Kruger\"],PARAMETER[\"False_Easting\",37500000.0],PARAMETER[\"False_Northing\",0.0],PARAMETER[\"Central_Meridian\",111.0],PARAMETER[\"Scale_Factor\",1.0],PARAMETER[\"Latitude_Of_Origin\",0.0],UNIT[\"Meter\",1.0]]",
             scratchWorkspace=r"C:\Users\Administrator\Documents\ArcGIS\Default.gdb",
-            workspace=r"C:\Users\Administrator\Documents\ArcGIS\Default.gdb"):
+            workspace=r"C:\Users\Administrator\Documents\ArcGIS\Default.gdb",
+            ):
         '''
         ————————————————准备相关基础数据————————————————
         '''
@@ -39,7 +40,7 @@ def Model_For_Part_Entirety_Replace(bgdc, plan, sea, sea_range, road, range, ent
         arcpy.analysis.Erase(road, yjjbnt, road_E)
         road_EE = "C:\\TEMP_GDB.gdb\\road_EE"
         arcpy.analysis.Erase(road_E, stbhhx, road_EE)
-        road_EE = road  # 规避生态红线和永农对道路的擦除
+        # road_EE = road  # 规避生态红线和永农对道路的擦除
         print("Process: 擦除永农和生态红线内规划")
 
         '''
@@ -414,7 +415,7 @@ def czc(czcsx,ydyh,kfbj):
                                         code_block=czc_codebook)
         print("Process26/28: 补充城镇村属性码(CZCSX)")
 
-        complete_plan = os.path.join(output_path, "complete_plan_20230417_ku")
+        complete_plan = os.path.join(output_path, "complete_plan_20230418_ku")
         arcpy.management.AddField(single_part_plan, field_name="YDYHFLMC", field_type="TEXT", field_length=50)
         arcpy.MakeFeatureLayer_management(single_part_plan, "plan_lyr")
         arcpy.JoinField_management("plan_lyr", "YDYHFLDM", dm2name_table, "dm")
