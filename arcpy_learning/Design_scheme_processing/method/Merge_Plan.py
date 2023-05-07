@@ -306,30 +306,32 @@ def color(DM):
 
         arcpy.management.AddField(single_part_plan, field_name="GHZT", field_type="TEXT", field_length=2)
         GHZT_codebook = """
-def GHZT(ysdm, jsyd): # 通过用于替换的现状要素图层的图层要素代码确认是否是现状用地
-    if ysdm == "2090010100" or jsyd == 1:
-        return "10"
-    else:
+def GHZT(ydyh, jsyd): # 通过用于替换的现状要素图层的图层要素代码确认是否是现状用地
+    if ydyh[:2] in ['07','08','09','10','11','12','13','14','15','16'] and jsyd != 1:
         return "20"
-        """
-        arcpy.management.CalculateField(single_part_plan, field="GHZT", expression="GHZT(!YSDM!,!jsyd!)",
+    else:
+        return "10"
+    """
+        arcpy.management.CalculateField(single_part_plan, field="GHZT", expression="GHZT(!YDYHEJLDM!,!jsyd!)",
                                         expression_type="PYTHON3", code_block=GHZT_codebook)
         print("Process22/28: 补充规划状态字段(GHZT)")
 
         arcpy.management.AddField(single_part_plan, field_name="YDYHFLDM", field_type="TEXT", field_length=10)
         YDYHFLDM_codebook = """
-def YDYHFLDM(ydyh2,ydyh3,kfbj):
+def YDYHFLDM(ydyh2,ydyh3,kfbj,czcsx):
     if ydyh3 in ['100103','110103']:
         return ydyh3
-    elif ydyh2 == '1207' and kfbj == 0: # 将开发边界外1207用地改为1201用地
-        return "1202"
+    # elif ydyh2 == '1207' and kfbj == 0: # 将开发边界外1207用地改为1201用地
+    #     return "1202"
+    elif ydyh2 == '0703' and czcsx not in ['20']: # 将新增的村庄宅基地改为城镇住宅用地
+        return '0701'
     elif ydyh2[:2] in ['07','08','10','11','12','13','14','17','18','19','20','21','22']:
         return ydyh2
     else:
         return ydyh2[:2]
         """
         arcpy.management.CalculateField(single_part_plan, field="YDYHFLDM",
-                                        expression="YDYHFLDM(!YDYHEJLDM!,!YDYHSJLDM!,!kfbj!)",
+                                        expression="YDYHFLDM(!YDYHEJLDM!,!YDYHSJLDM!,!kfbj!,!CZCSX1!)",
                                         expression_type="PYTHON3", code_block=YDYHFLDM_codebook)
         print("Process23/28: 补充用地用海分类代码字段(YDYHFLDM)")
 
@@ -386,9 +388,9 @@ def NIR_codebook(ydyh):
         czc_codebook = """
 def czc(czcsx,ydyh,kfbj):
     if kfbj == 1:
-        if ydyh[:2] in ['07','08','09','10','11','12','13','14','16'] and ydyh not in ['0703','1002','1003']:
+        if ydyh[:2] in ['07','08','09','10','11','12','13','14','16'] and ydyh not in ['0703','1002','1003','1201','1202','1203','1204','1312']:
             return '10'
-        elif ydyh[:2] == '15' or ydyh in ['1002','1003']:
+        elif ydyh[:2] == '15' or ydyh in ['1002','1003','1201','1202','1203','1204','1312']:
             return  None
         elif czcsx in ['20']:
             return '20'
@@ -399,13 +401,9 @@ def czc(czcsx,ydyh,kfbj):
     else:
         if czcsx == '20':
             return '20'
-        elif ydyh[:2] == '15' or ydyh in ['1002','1003']:
+        elif ydyh[:2] == '15' or ydyh in ['1002','1003','1201','1202','1203','1204','1312']:
             return None
-        elif ydyh[:2] in ['07','08','09','10','11','13','14','16'] and ydyh not in ['1002','1003']:
-            return '10'
-        elif ydyh in ['1201','1202','1203','1204']:
-            return None
-        elif ydyh[:2] == '12':
+        elif ydyh[:2] in ['07','08','09','10','11','12','13','14','16'] and ydyh not in ['1002','1003','1201','1202','1203','1204','1312']:
             return '10'
         else:
             return None
@@ -415,7 +413,7 @@ def czc(czcsx,ydyh,kfbj):
                                         code_block=czc_codebook)
         print("Process26/28: 补充城镇村属性码(CZCSX)")
 
-        complete_plan = os.path.join(output_path, "complete_plan_20230418_ku")
+        complete_plan = os.path.join(output_path, "complete_plan_20230505_ku")
         arcpy.management.AddField(single_part_plan, field_name="YDYHFLMC", field_type="TEXT", field_length=50)
         arcpy.MakeFeatureLayer_management(single_part_plan, "plan_lyr")
         arcpy.JoinField_management("plan_lyr", "YDYHFLDM", dm2name_table, "dm")
@@ -424,7 +422,7 @@ def czc(czcsx,ydyh,kfbj):
 
         arcpy.management.CalculateField(complete_plan, field="YDYHFLDM", expression="!YDYHFLDM!.ljust(6,'0')",
                                         expression_type="PYTHON3")
-        print("Process28/28: 补充用地用海分类名称字段(YDYHFLMC)")
+        print("Process27/28: 补充用地用海分类名称字段(YDYHFLMC)")
 
         arcpy.management.DeleteField(complete_plan,
                                      "FID_plan_by_kfbj;FID_plan_by_czc;FID_plan_by_zone;FID_inside_ZXCQ_plan_renew_road;ZONE;MERGE_SRC;FID_B市辖区县级行政边界;FID_变更调查2020乡村建设用地203;FID_封库城镇开发边界;FID_变更调查2020建设用地;ORIG_FID;id;dm;name;YSDM_1",
