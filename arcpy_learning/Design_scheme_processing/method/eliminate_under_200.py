@@ -21,7 +21,7 @@ def eliminate_under_200(input_file, styn, output_file, jsyd):
             workspace=r"C:\Users\Administrator\Documents\ArcGIS\Default.gdb"):
         arcpy.management.CreateFileGDB("C:\\", "TEMP_GDB", "CURRENT")
 
-        sql_under_200 = r'Shape_Area < 200.05'
+        sql_under_200 = r"Shape_Area < 200.05 and BZ = ''"
         ex_sql = r"(CZCSX1 = '20' or CZCSX = '') And Shape_Area > 200.05"
 
         inside_styn = r'C:\\TEMP_GDB.gdb\\inside_styn'

@@ -10,9 +10,12 @@ from arcpy import management
 
 
 def Model_For_Part_Entirety_Replace(bgdc, plan, sea, sea_range, road, range, entirety_replace_part, zone, czc, jsyd,
-                                    kfbj, yjjbnt, stbhhx, dm2name_table, output_path, plan_across_shoreline=0):  # 模型
+                                    kfbj, yjjbnt, stbhhx, dm2name_table, output_path, plan_across_shoreline=0,
+                                    plan_across_kfbj=0):  # 模型
     '''
     参数（现状图层, 方案图层, 用海图层, 海域范围，路网图层, 中心城区范围图层, 需要整体替换的部分，输出目录）
+    plan_across_shoreline 为 0 时，所有海岸线外的所有规划和现状用地都将被擦除并替换为海洋功能区划内容，为 1 时海岸线外规划方案建设用地+用海和现状建设用地将覆盖海洋功能区划内容
+    plan_across_kfbj 为 0 时，开发边界外的规划居住、商业、工业、物流用地都将被擦除并替换为现状，为 1 时规划居住、商业、工业、物流用地超过开发边界将被保留
     '''
 
     # To allow overwriting outputs change overwriteOutput option to True.
@@ -24,7 +27,7 @@ def Model_For_Part_Entirety_Replace(bgdc, plan, sea, sea_range, road, range, ent
             cartographicCoordinateSystem="PROJCS[\"CGCS2000_3_Degree_GK_Zone_37\",GEOGCS[\"GCS_China_Geodetic_Coordinate_System_2000\",DATUM[\"D_China_2000\",SPHEROID[\"CGCS2000\",6378137.0,298.257222101]],PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433]],PROJECTION[\"Gauss_Kruger\"],PARAMETER[\"False_Easting\",37500000.0],PARAMETER[\"False_Northing\",0.0],PARAMETER[\"Central_Meridian\",111.0],PARAMETER[\"Scale_Factor\",1.0],PARAMETER[\"Latitude_Of_Origin\",0.0],UNIT[\"Meter\",1.0]]",
             scratchWorkspace=r"C:\Users\Administrator\Documents\ArcGIS\Default.gdb",
             workspace=r"C:\Users\Administrator\Documents\ArcGIS\Default.gdb",
-            ):
+    ):
         '''
         ————————————————准备相关基础数据————————————————
         '''
@@ -36,6 +39,11 @@ def Model_For_Part_Entirety_Replace(bgdc, plan, sea, sea_range, road, range, ent
         arcpy.analysis.Erase(plan, yjjbnt, plan_E)
         plan_EE = "C:\\TEMP_GDB.gdb\\plan_EE"
         arcpy.analysis.Erase(plan_E, stbhhx, plan_EE)
+        plan_I_kfbj = "C:\\TEMP_GDB.gdb\\plan_I_kfbj"
+        arcpy.analysis.Identity(plan_EE, kfbj, plan_I_kfbj)
+        plan_EEE = "C:\\TEMP_GDB.gdb\\plan_EEE"
+        arcpy.analysis.Select(plan_I_kfbj, plan_EEE, "kfbj = 1 or YDYHYJLDM NOT IN ('07', '09', '10', '11')")
+        arcpy.management.DeleteField(plan_EEE, "kfbj", "DELETE_FIELDS")
         road_E = "C:\\TEMP_GDB.gdb\\road_E"
         arcpy.analysis.Erase(road, yjjbnt, road_E)
         road_EE = "C:\\TEMP_GDB.gdb\\road_EE"
@@ -55,9 +63,14 @@ def Model_For_Part_Entirety_Replace(bgdc, plan, sea, sea_range, road, range, ent
         arcpy.analysis.Clip(sea, range, inside_ZXCQ_plan_sea)
         print("Process2/28: 擦除中心城区范围外用海图斑")
 
-        inside_ZXCQ_plan_land = "C:\\TEMP_GDB.gdb\\inside_ZXCQ_plan_land"
-        arcpy.analysis.Clip(plan_EE, range, inside_ZXCQ_plan_land)
-        print("Process3/28: 擦除中心城区范围外规划用地图斑")
+        if plan_across_kfbj == 0:
+            inside_ZXCQ_plan_land = "C:\\TEMP_GDB.gdb\\inside_ZXCQ_plan_land"
+            arcpy.analysis.Clip(plan_EEE, range, inside_ZXCQ_plan_land)
+            print("Process3/28: 擦除中心城区范围外规划用地图斑")
+        elif plan_across_kfbj == 1:
+            inside_ZXCQ_plan_land = "C:\\TEMP_GDB.gdb\\inside_ZXCQ_plan_land"
+            arcpy.analysis.Clip(plan_EE, range, inside_ZXCQ_plan_land)
+            print("Process3/28: 擦除中心城区范围外规划用地图斑")
 
         inside_ZXCQ_plan_road = "C:\\TEMP_GDB.gdb\\inside_ZXCQ_plan_road"
         arcpy.analysis.Clip(road_EE, range, inside_ZXCQ_plan_road)
@@ -92,6 +105,7 @@ def Model_For_Part_Entirety_Replace(bgdc, plan, sea, sea_range, road, range, ent
         fm_YDYHEJLDM = arcpy.FieldMap()
         fm_YDYHSJLDM = arcpy.FieldMap()
         fm_YSDM = arcpy.FieldMap()
+        fm_BZ = arcpy.FieldMap()
         fms = arcpy.FieldMappings()
         # Get the field names of vegetation type and diameter for both original
         infile1_YDYHYJLDM = 'YDYHYJLDM'
@@ -101,6 +115,7 @@ def Model_For_Part_Entirety_Replace(bgdc, plan, sea, sea_range, road, range, ent
         infile2_YDYHYJLDM = 'YDYHYJLDM'
         infile2_YDYHEJLDM = 'YDYHEJLDM'
         infile2_YDYHSJLDM = 'YDYHSJLDM'
+        infile2_BZ = 'BZ'
         # Add fields to their corresponding FieldMap objects
         fm_YDYHYJLDM.addInputField(infile1, infile1_YDYHYJLDM)
         fm_YDYHYJLDM.addInputField(infile2, infile2_YDYHYJLDM)
@@ -109,6 +124,7 @@ def Model_For_Part_Entirety_Replace(bgdc, plan, sea, sea_range, road, range, ent
         fm_YDYHSJLDM.addInputField(infile1, infile1_YDYHSJLDM)
         fm_YDYHSJLDM.addInputField(infile2, infile2_YDYHSJLDM)
         fm_YSDM.addInputField(infile1, infile1_YSDM)
+        fm_BZ.addInputField(infile2, infile2_BZ)
         # Set the output field properties for both FieldMap objects
         YDYHYJLDM = fm_YDYHYJLDM.outputField
         YDYHYJLDM.name = 'YDYHYJLDM'
@@ -130,13 +146,20 @@ def Model_For_Part_Entirety_Replace(bgdc, plan, sea, sea_range, road, range, ent
         YSDM.aliasName = 'YSDM'
         YSDM.length = 10
         fm_YSDM.outputField = YSDM
+        BZ = fm_BZ.outputField
+        BZ.name = 'BZ'
+        BZ.aliasName = 'BZ'
+        BZ.length = 255
+        fm_BZ.outputField = BZ
         # Add the FieldMap objects to the FieldMappings object
         fms.addFieldMap(fm_YDYHYJLDM)
         fms.addFieldMap(fm_YDYHEJLDM)
         fms.addFieldMap(fm_YDYHSJLDM)
         fms.addFieldMap(fm_YSDM)
+        fms.addFieldMap(fm_BZ)
         print("Process6/28: 维护合并字段")
-        arcpy.management.Merge([inside_ZXCQ_unplanned_land_and_sea, inside_ZXCQ_plan_land], inside_ZXCQ_Cland_and_Pland, fms)
+        arcpy.management.Merge([inside_ZXCQ_unplanned_land_and_sea, inside_ZXCQ_plan_land], inside_ZXCQ_Cland_and_Pland,
+                               fms)
         print("Process7/28: 将中心城区规划用地和现状保留用地合并")
 
         if plan_across_shoreline == 1:
@@ -146,6 +169,21 @@ def Model_For_Part_Entirety_Replace(bgdc, plan, sea, sea_range, road, range, ent
             arcpy.analysis.Select(inside_ZXCQ_plan_land_over_sea, inside_ZXCQ_plan_Pland_and_Cland_over_sea,
                                   where_clause="YDYHYJLDM IN ('07','08','09','10','11','12','13','14','15','16','17','18','19','20','21','22','24')")
             print("Process8/28: 提取中心城区内规划+现状用地海岸线外的建设用地部分")
+
+            reset_road_in_sea_codebook = """
+def reset_road_in_sea(DM):
+    if DM in ["1201","1202","1207"]:
+        return "2003"
+    elif DM == "1205":
+        return "1906"
+    else:
+        return DM
+            """
+            arcpy.management.CalculateField(inside_ZXCQ_plan_Pland_and_Cland_over_sea, field="YDYHEJLDM",
+                                            expression="reset_road_in_sea(!YDYHEJLDM!)", expression_type="PYTHON3",
+                                            code_block=reset_road_in_sea_codebook)
+            arcpy.management.CalculateField(inside_ZXCQ_plan_Pland_and_Cland_over_sea, field="YDYHYJLDM",
+                                            expression="!YDYHEJLDM![:2]", expression_type="PYTHON3")
 
             inside_ZXCQ_plan_land_in_landside = "C:\\TEMP_GDB.gdb\\inside_ZXCQ_plan_land_in_landside"
             arcpy.analysis.Erase(inside_ZXCQ_Cland_and_Pland, sea_range, inside_ZXCQ_plan_land_in_landside)
@@ -172,8 +210,23 @@ def Model_For_Part_Entirety_Replace(bgdc, plan, sea, sea_range, road, range, ent
 
             inside_ZXCQ_plan_sea_over_sea = "C:\\TEMP_GDB.gdb\\inside_ZXCQ_plan_sea_over_sea"
             arcpy.analysis.Select(inside_ZXCQ_plan_land_over_sea, inside_ZXCQ_plan_sea_over_sea,
-                                  where_clause="YDYHYJLDM IN ('18','19','20','21','22','24')")
+                                  where_clause="YDYHYJLDM IN ('18','19','20','21','22','24') or YDYHEJLDM IN ('1201','1202','1207')")
             print("Process8/28: 提取中心城区内规划用地中，海岸线外的用海")
+
+            reset_road_in_sea_codebook = """
+def reset_road_in_sea(DM):
+    if DM in ["1201","1202","1207"]:
+        return "2003"
+    elif DM == "1205":
+        return "1906"
+    else:
+        return DM
+            """
+            arcpy.management.CalculateField(inside_ZXCQ_plan_sea_over_sea, field="YDYHEJLDM",
+                                            expression="reset_road_in_sea(!YDYHEJLDM!)", expression_type="PYTHON3",
+                                            code_block=reset_road_in_sea_codebook)
+            arcpy.management.CalculateField(inside_ZXCQ_plan_sea_over_sea, field="YDYHYJLDM",
+                                            expression="!YDYHEJLDM![:2]", expression_type="PYTHON3")
 
             inside_ZXCQ_plan_land_in_landside = "C:\\TEMP_GDB.gdb\\inside_ZXCQ_plan_land_in_landside"
             arcpy.analysis.Erase(inside_ZXCQ_Cland_and_Pland, sea_range, inside_ZXCQ_plan_land_in_landside)
@@ -197,12 +250,30 @@ def Model_For_Part_Entirety_Replace(bgdc, plan, sea, sea_range, road, range, ent
         ————————————————替换道路部分————————————————
         '''
 
+        road_i = "C:\\TEMP_GDB.gdb\\road_i"
+        arcpy.analysis.Identity(inside_ZXCQ_plan_road, sea_range, road_i)
+        road_ii = "C:\\TEMP_GDB.gdb\\road_ii"
+        arcpy.analysis.Identity(road_i, jsyd, road_ii)
+        arcpy.management.AddField(road_ii, field_name="YDYHEJLDM", field_type="TEXT", field_length=4)
+        road_sea = '''
+def road_sea(sea,jsyd):
+    if sea == 1 and jsyd != 1:
+        return "2003"
+    else:
+        return "1207"
+        '''
+        arcpy.management.CalculateField(road_ii, field="YDYHEJLDM", expression="road_sea(!sea!,!jsyd!)", code_block=road_sea,
+                                        expression_type="PYTHON3")
+        arcpy.management.DeleteField(road_ii,
+                                     "sea;jsyd;FID_inside_ZXCQ_plan_road;FID_E海域范围_大陆海岛修测岸线",
+                                     "DELETE_FIELDS")
+
         inside_ZXCQ_plan_erase_road = "C:\\TEMP_GDB.gdb\\inside_ZXCQ_plan_except_plan_land_over_sea_erase_road"
         arcpy.analysis.Erase(inside_ZXCQ_plan, road_EE, inside_ZXCQ_plan_erase_road)
         print("Process13/28: 擦除合成的方案中的道路部分")
 
         inside_ZXCQ_plan_renew_road = "C:\\TEMP_GDB.gdb\\inside_ZXCQ_plan_renew_road"
-        arcpy.management.Merge([inside_ZXCQ_plan_erase_road, inside_ZXCQ_plan_road], inside_ZXCQ_plan_renew_road)
+        arcpy.management.Merge([inside_ZXCQ_plan_erase_road, road_ii], inside_ZXCQ_plan_renew_road)
         print("Process14/28: 将道路合并入已经擦除道路部分的方案中")
 
         '''
@@ -247,22 +318,23 @@ def Model_For_Part_Entirety_Replace(bgdc, plan, sea, sea_range, road, range, ent
         '''
         ————————————————字段整理部分————————————————
         '''
-
-        traffic_codebook = """
-def traffic(DM):
-    if DM is None:
-        return "1207"
-    else:
-        return DM
-            """
-        arcpy.management.CalculateField(single_part_plan, field="YDYHEJLDM", expression="traffic(!YDYHEJLDM!)",
-                                        expression_type="PYTHON3", code_block=traffic_codebook)
-        print("Process20/28: 补充交通缺失字段")
+#         traffic_codebook = """
+# def traffic(DM):
+#     if DM is None:
+#         return "1207"
+#     else:
+#         return DM
+#             """
+#         arcpy.management.CalculateField(single_part_plan, field="YDYHEJLDM", expression="traffic(!YDYHEJLDM!)",
+#                                         expression_type="PYTHON3", code_block=traffic_codebook)
+#         arcpy.management.CalculateField(single_part_plan, field="YDYHYJLDM",
+#                                         expression="!YDYHEJLDM![:2]", expression_type="PYTHON3")
+#         print("Process20/28: 补充交通缺失字段")
 
         if plan_across_shoreline == 1:
             check_used_land_codebook = """
 def check_used_land(jsyd,ydyhfldm):
-    if jsyd == 1 and ydyhfldm[:2] not in ['07','08','09','10','11','12','13','14','15','16']:
+    if jsyd == 1 and ydyhfldm[:2] not in ['07','08','09','10','11','12','13','14','15','16','17','20']:
         return "16"
     else:
         return ydyhfldm
@@ -323,8 +395,8 @@ def YDYHFLDM(ydyh2,ydyh3,kfbj,czcsx):
         return ydyh3
     # elif ydyh2 == '1207' and kfbj == 0: # 将开发边界外1207用地改为1201用地
     #     return "1202"
-    elif ydyh2 == '0703' and czcsx not in ['20']: # 将新增的村庄宅基地改为城镇住宅用地
-        return '0701'
+    # elif ydyh2 == '0703' and czcsx not in ['20']: # 将新增的村庄宅基地改为城镇住宅用地
+    #     return '0701'
     elif ydyh2[:2] in ['07','08','10','11','12','13','14','17','18','19','20','21','22']:
         return ydyh2
     else:
@@ -365,13 +437,15 @@ def xzqmc(xzqmc):
         #                                 expression_type="PYTHON3")
 
         YD1004_codebook = """
-def NI_codebook(ydyh):
+def NI_codebook(ydyh,bz):
     if ydyh in ['1004']:
         return "规划新型产业用地，由于缺少对应代码，按照一类工业用地100101表示"
+    elif bz is not None:
+        return bz
     else:
         return ""
         """
-        arcpy.management.CalculateField(single_part_plan, field="BZ", expression="NI_codebook(!YDYHFLDM!)",
+        arcpy.management.CalculateField(single_part_plan, field="BZ", expression="NI_codebook(!YDYHFLDM!,!BZ!)",
                                         expression_type="PYTHON3", code_block=YD1004_codebook)
 
         YD1004reset_codebook = """
@@ -413,7 +487,7 @@ def czc(czcsx,ydyh,kfbj):
                                         code_block=czc_codebook)
         print("Process26/28: 补充城镇村属性码(CZCSX)")
 
-        complete_plan = os.path.join(output_path, "complete_plan_20230505_ku")
+        complete_plan = os.path.join(output_path, "complete_plan_20230616")
         arcpy.management.AddField(single_part_plan, field_name="YDYHFLMC", field_type="TEXT", field_length=50)
         arcpy.MakeFeatureLayer_management(single_part_plan, "plan_lyr")
         arcpy.JoinField_management("plan_lyr", "YDYHFLDM", dm2name_table, "dm")
@@ -425,6 +499,6 @@ def czc(czcsx,ydyh,kfbj):
         print("Process27/28: 补充用地用海分类名称字段(YDYHFLMC)")
 
         arcpy.management.DeleteField(complete_plan,
-                                     "FID_plan_by_kfbj;FID_plan_by_czc;FID_plan_by_zone;FID_inside_ZXCQ_plan_renew_road;ZONE;MERGE_SRC;FID_B市辖区县级行政边界;FID_变更调查2020乡村建设用地203;FID_封库城镇开发边界;FID_变更调查2020建设用地;ORIG_FID;id;dm;name;YSDM_1",
+                                     "FID_plan_by_kfbj;FID_plan_by_czc;FID_plan_by_zone;FID_inside_ZXCQ_plan_renew_road;ZONE;MERGE_SRC;FID_B市辖区县级行政边界;FID_变更调查2020乡村建设用地203;FID_封库城镇开发边界;FID_变更调查2020建设用地;ORIG_FID;id;dm;name;YSDM_1;FID_replaced_plan;BZ_1;CZCSX1",
                                      "DELETE_FIELDS")
         print("Process28/28: 清除多余字段")
