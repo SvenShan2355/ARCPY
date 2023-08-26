@@ -59,8 +59,10 @@ def Model_For_Part_Entirety_Replace(bgdc, plan, sea, sea_range, road, range, ent
         arcpy.analysis.Clip(bgdc, range, inside_ZXCQ_current_land)
         print("Process1/28: 擦除中心城区范围外现状用地图斑")
 
+        inside_ZXCQ_plan_sea_0 = "C:\\TEMP_GDB.gdb\\inside_ZXCQ_plan_sea_0"
+        arcpy.analysis.Clip(sea, range, inside_ZXCQ_plan_sea_0)
         inside_ZXCQ_plan_sea = "C:\\TEMP_GDB.gdb\\inside_ZXCQ_plan_sea"
-        arcpy.analysis.Clip(sea, range, inside_ZXCQ_plan_sea)
+        arcpy.analysis.Clip(inside_ZXCQ_plan_sea_0, sea_range, inside_ZXCQ_plan_sea)
         print("Process2/28: 擦除中心城区范围外用海图斑")
 
         if plan_across_kfbj == 0:
@@ -254,15 +256,17 @@ def reset_road_in_sea(DM):
         arcpy.analysis.Identity(inside_ZXCQ_plan_road, sea_range, road_i)
         road_ii = "C:\\TEMP_GDB.gdb\\road_ii"
         arcpy.analysis.Identity(road_i, jsyd, road_ii)
-        arcpy.management.AddField(road_ii, field_name="YDYHEJLDM", field_type="TEXT", field_length=4)
+        # arcpy.management.AddField(road_ii, field_name="YDYHEJLDM", field_type="TEXT", field_length=4)
         road_sea = '''
-def road_sea(sea,jsyd):
-    if sea == 1 and jsyd != 1:
+def road_sea(ydyh,sea,jsyd):
+    if ydyh == "1202":
+        return "1202"
+    elif sea == 1 and jsyd != 1:
         return "2003"
     else:
         return "1207"
         '''
-        arcpy.management.CalculateField(road_ii, field="YDYHEJLDM", expression="road_sea(!sea!,!jsyd!)", code_block=road_sea,
+        arcpy.management.CalculateField(road_ii, field="YDYHEJLDM", expression="road_sea(!YDYHEJLDM!,!sea!,!jsyd!)", code_block=road_sea,
                                         expression_type="PYTHON3")
         arcpy.management.DeleteField(road_ii,
                                      "sea;jsyd;FID_inside_ZXCQ_plan_road;FID_E海域范围_大陆海岛修测岸线",
@@ -439,7 +443,7 @@ def xzqmc(xzqmc):
         YD1004_codebook = """
 def NI_codebook(ydyh,bz):
     if ydyh in ['1004']:
-        return "规划新型产业用地，由于缺少对应代码，按照一类工业用地100101表示"
+        return "规划新型产业用地，由于缺少对应代码，按照工业用地1001表示"
     elif bz is not None:
         return bz
     else:
@@ -462,9 +466,9 @@ def NIR_codebook(ydyh):
         czc_codebook = """
 def czc(czcsx,ydyh,kfbj):
     if kfbj == 1:
-        if ydyh[:2] in ['07','08','09','10','11','12','13','14','16'] and ydyh not in ['0703','1002','1003','1201','1202','1203','1204','1312']:
+        if ydyh[:2] in ['07','08','09','10','11','12','13','14','16'] and ydyh not in ['0703','1002','1003','1201','1202','1203','1204','1205','1206','1311','1312']:
             return '10'
-        elif ydyh[:2] == '15' or ydyh in ['1002','1003','1201','1202','1203','1204','1312']:
+        elif ydyh[:2] == '15' or ydyh in ['1002','1003','1201','1202','1203','1204','1205','1206','1311','1312']:
             return  None
         elif czcsx in ['20']:
             return '20'
@@ -473,11 +477,11 @@ def czc(czcsx,ydyh,kfbj):
         else:
             return None
     else:
-        if czcsx == '20':
+        if czcsx == '20' and ydyh != '1207':
             return '20'
-        elif ydyh[:2] == '15' or ydyh in ['1002','1003','1201','1202','1203','1204','1312']:
+        elif ydyh[:2] == '15' or ydyh in ['1002','1003','1201','1202','1203','1204','1205','1206','1311','1312']:
             return None
-        elif ydyh[:2] in ['07','08','09','10','11','12','13','14','16'] and ydyh not in ['1002','1003','1201','1202','1203','1204','1312']:
+        elif ydyh[:2] in ['07','08','09','10','11','12','13','14','16'] and ydyh not in ['1002','1003','1201','1202','1203','1204','1205','1206','1311','1312']:
             return '10'
         else:
             return None
@@ -487,7 +491,7 @@ def czc(czcsx,ydyh,kfbj):
                                         code_block=czc_codebook)
         print("Process26/28: 补充城镇村属性码(CZCSX)")
 
-        complete_plan = os.path.join(output_path, "complete_plan_20230722_19AX")
+        complete_plan = os.path.join(output_path, "complete_plan_20230826_SDAX_sjk")
         arcpy.management.AddField(single_part_plan, field_name="YDYHFLMC", field_type="TEXT", field_length=50)
         arcpy.MakeFeatureLayer_management(single_part_plan, "plan_lyr")
         arcpy.JoinField_management("plan_lyr", "YDYHFLDM", dm2name_table, "dm")
