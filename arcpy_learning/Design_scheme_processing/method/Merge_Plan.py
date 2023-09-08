@@ -464,9 +464,11 @@ def NIR_codebook(ydyh):
         print("Process25/28: 备注新型产业用地")
 
         czc_codebook = """
-def czc(czcsx,ydyh,kfbj):
+def czc(czcsx,ydyh,kfbj,bz):
     if kfbj == 1:
-        if ydyh[:2] in ['07','08','09','10','11','12','13','14','16'] and ydyh not in ['0703','1002','1003','1201','1202','1203','1204','1205','1206','1311','1312']:
+        if bz in ('10','20'):
+            return bz
+        elif ydyh[:2] in ['07','08','09','10','11','12','13','14','16'] and ydyh not in ['0703','1002','1003','1201','1202','1203','1204','1205','1206','1311','1312']:
             return '10'
         elif ydyh[:2] == '15' or ydyh in ['1002','1003','1201','1202','1203','1204','1205','1206','1311','1312']:
             return  None
@@ -477,7 +479,9 @@ def czc(czcsx,ydyh,kfbj):
         else:
             return None
     else:
-        if czcsx == '20' and ydyh != '1207':
+        if bz in ('10','20'):
+            return bz
+        elif (czcsx == '20' and ydyh != '1207') or bz == '乡村振兴点状供地':
             return '20'
         elif ydyh[:2] == '15' or ydyh in ['1002','1003','1201','1202','1203','1204','1205','1206','1311','1312']:
             return None
@@ -486,12 +490,12 @@ def czc(czcsx,ydyh,kfbj):
         else:
             return None
         """
-        arcpy.management.CalculateField(single_part_plan, field="CZCSX", expression="czc(!CZCSX1!,!YDYHFLDM!,!kfbj!)",
+        arcpy.management.CalculateField(single_part_plan, field="CZCSX", expression="czc(!CZCSX1!,!YDYHFLDM!,!kfbj!,!BZ!)",
                                         expression_type="PYTHON3",
                                         code_block=czc_codebook)
         print("Process26/28: 补充城镇村属性码(CZCSX)")
 
-        complete_plan = os.path.join(output_path, "complete_plan_20230826_SDAX_sjk")
+        complete_plan = os.path.join(output_path, "complete_plan_20230905_SDAX_sjk")
         arcpy.management.AddField(single_part_plan, field_name="YDYHFLMC", field_type="TEXT", field_length=50)
         arcpy.MakeFeatureLayer_management(single_part_plan, "plan_lyr")
         arcpy.JoinField_management("plan_lyr", "YDYHFLDM", dm2name_table, "dm")

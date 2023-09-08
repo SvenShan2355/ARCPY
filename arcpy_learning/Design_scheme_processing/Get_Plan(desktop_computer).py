@@ -14,7 +14,7 @@ if __name__ == '__main__':
     #     r"E:\DataBase_本地更新库\湛江市国土空间规划\Database\中心城区方案.gdb\立交节点0307",
     #     r"E:\DataBase_本地更新库\湛江市国土空间规划\Output_Database.gdb", "HCJL", "DJJL")
 
-    # # 合成方案
+    # 合成方案
     # Merge_Plan.Model_For_Part_Entirety_Replace(
     #     bgdc=r"E:\DataBase_本地更新库\湛江市国土空间规划\湛江市国土空间规划.gdb\中心城区XZYDYH20230809",
     #     plan=r"E:\DataBase_本地更新库\湛江市国土空间规划\Database\中心城区方案.gdb\中心城区方案到中心线20230825_SDax",  # 微调版需要更换
@@ -22,7 +22,7 @@ if __name__ == '__main__':
     #     sea_range=r"E:\DataBase_本地更新库\湛江市国土空间规划\湛江市国土空间规划.gdb\E海域范围_20000_至三调边界",
     #     road=r"E:\DataBase_本地更新库\湛江市国土空间规划\Output_Database.gdb\output_roads_20230814_ckxs",
     #     range=r"E:\DataBase_本地更新库\湛江市国土空间规划\Database\中心城区方案.gdb\中心城区范围线20230601",
-    #     entirety_replace_part=r"E:\DataBase_本地更新库\湛江市国土空间规划\Database\中心城区方案.gdb\PTMZ用地方案_sdax_20230811",
+    #     entirety_replace_part=r"E:\DataBase_本地更新库\湛江市国土空间规划\Database\中心城区方案.gdb\PTMZ用地方案0904_sdax",
     #     zone=r"E:\DataBase_共享总库\ZJ\0_基础数据总库\湛江市国土空间总体规划.gdb\B市辖区县级行政边界",
     #     czc=r"E:\DataBase_本地更新库\湛江市国土空间规划\湛江市国土空间规划.gdb\变更调查2020乡村建设用地203",
     #     jsyd=r'E:\DataBase_本地更新库\湛江市国土空间规划\湛江市国土空间规划.gdb\变更调查2020建设用地',
@@ -36,9 +36,9 @@ if __name__ == '__main__':
     # )
 
     # 消除碎图斑
-    eliminate_under_200.eliminate_under_200(input_file=r'E:\DataBase_本地更新库\湛江市国土空间规划\Output_Database.gdb\complete_plan_20230826_SDAX_sjk',
+    eliminate_under_200.eliminate_under_200(input_file=r'E:\DataBase_本地更新库\湛江市国土空间规划\Output_Database.gdb\complete_plan_20230905_SDAX_sjk',
                                             styn=r'E:\DataBase_共享总库\ZJ\04_三区三线试划\成果_20221110-广东省“三区三线”划定成果矢量数据（部下发封库版）\三区三线下发版.gdb\STBHYN_d',
-                                            output_file=r'E:\DataBase_本地更新库\湛江市国土空间规划\Output_Database.gdb\complete_plan_20230826_SDAX_sjk_E',
+                                            output_file=r'E:\DataBase_本地更新库\湛江市国土空间规划\Output_Database.gdb\complete_plan_20230904_SDAX_sjk_E',
                                             jsyd=r'E:\DataBase_本地更新库\湛江市国土空间规划\湛江市国土空间规划.gdb\变更调查2020建设用地')
 
     '''
