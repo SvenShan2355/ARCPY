@@ -121,9 +121,9 @@ if __name__ == '__main__':
     with open('goeinfo.csv', 'a+', encoding='utf-8') as f:
         f.write("地名,地址,经度,纬度,误差（米）,地区等级\n", )
         f.close()
-    with open(r'C:\Users\Administrator\Desktop\yiliao2.csv', 'r', encoding='utf-8') as file:
+    with open(r'C:\Users\Administrator\Desktop\diaoyan.csv', 'r', encoding='utf-8') as file:
         data = csv.reader(file)
         for i in data:
-            get_urt(i[0], i[2])
+            get_urt(i[0],"——")
 
     print('地区加载完成，已生成结果')
