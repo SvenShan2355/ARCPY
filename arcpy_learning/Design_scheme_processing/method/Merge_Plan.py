@@ -266,7 +266,8 @@ def road_sea(ydyh,sea,jsyd):
     else:
         return "1207"
         '''
-        arcpy.management.CalculateField(road_ii, field="YDYHEJLDM", expression="road_sea(!YDYHEJLDM!,!sea!,!jsyd!)", code_block=road_sea,
+        arcpy.management.CalculateField(road_ii, field="YDYHEJLDM", expression="road_sea(!YDYHEJLDM!,!sea!,!jsyd!)",
+                                        code_block=road_sea,
                                         expression_type="PYTHON3")
         arcpy.management.DeleteField(road_ii,
                                      "sea;jsyd;FID_inside_ZXCQ_plan_road;FID_E海域范围_大陆海岛修测岸线",
@@ -284,13 +285,16 @@ def road_sea(ydyh,sea,jsyd):
         ————————————————整体替换部分————————————————
         '''
         if entirety_replace_part != "":
+            entirety_replace_part_in_range = "C:\\TEMP_GDB.gdb\\inside_ZXCQ_plan_except_plan_land_over_sea_unreplace_part_in_range"
+            arcpy.analysis.Clip(entirety_replace_part, range, entirety_replace_part_in_range)
+
             inside_ZXCQ_plan_renew_road_unreplace_part = "C:\\TEMP_GDB.gdb\\inside_ZXCQ_plan_except_plan_land_over_sea_unreplace_part"
-            arcpy.analysis.Erase(inside_ZXCQ_plan_renew_road, entirety_replace_part,
+            arcpy.analysis.Erase(inside_ZXCQ_plan_renew_road, entirety_replace_part_in_range,
                                  inside_ZXCQ_plan_renew_road_unreplace_part)
             print("Process15/28: 擦除需要替换部分方案")
 
             replaced_plan = "C:\\TEMP_GDB.gdb\\replaced_plan"
-            arcpy.management.Merge([inside_ZXCQ_plan_renew_road_unreplace_part, entirety_replace_part], replaced_plan)
+            arcpy.management.Merge([inside_ZXCQ_plan_renew_road_unreplace_part, entirety_replace_part_in_range], replaced_plan)
             print("Process16/28: 将需要替换的部分与其他部分合成完整方案")
 
             plan_by_zone = "C:\\TEMP_GDB.gdb\\plan_by_zone"
@@ -322,63 +326,63 @@ def road_sea(ydyh,sea,jsyd):
         '''
         ————————————————字段整理部分————————————————
         '''
-#         traffic_codebook = """
-# def traffic(DM):
-#     if DM is None:
-#         return "1207"
-#     else:
-#         return DM
-#             """
-#         arcpy.management.CalculateField(single_part_plan, field="YDYHEJLDM", expression="traffic(!YDYHEJLDM!)",
-#                                         expression_type="PYTHON3", code_block=traffic_codebook)
-#         arcpy.management.CalculateField(single_part_plan, field="YDYHYJLDM",
-#                                         expression="!YDYHEJLDM![:2]", expression_type="PYTHON3")
-#         print("Process20/28: 补充交通缺失字段")
+        #         traffic_codebook = """
+        # def traffic(DM):
+        #     if DM is None:
+        #         return "1207"
+        #     else:
+        #         return DM
+        #             """
+        #         arcpy.management.CalculateField(single_part_plan, field="YDYHEJLDM", expression="traffic(!YDYHEJLDM!)",
+        #                                         expression_type="PYTHON3", code_block=traffic_codebook)
+        #         arcpy.management.CalculateField(single_part_plan, field="YDYHYJLDM",
+        #                                         expression="!YDYHEJLDM![:2]", expression_type="PYTHON3")
+        #         print("Process20/28: 补充交通缺失字段")
 
         if plan_across_shoreline == 1:
             check_used_land_codebook = """
-def check_used_land(jsyd,ydyhfldm):
-    if jsyd == 1 and ydyhfldm[:2] not in ['07','08','09','10','11','12','13','14','15','16','17','20']:
+def check_used_land(jsyd,ydyhfldm,xzqdm):
+    if jsyd == 1 and xzqdm in ['440802','440803'] and ydyhfldm[:2] not in ['07','08','09','10','11','12','13','14','15','16','17','20']:
         return "16"
     else:
         return ydyhfldm
                     """
             arcpy.management.CalculateField(single_part_plan, field="YDYHEJLDM",
-                                            expression="check_used_land(!jsyd!,!YDYHEJLDM!)",
+                                            expression="check_used_land(!jsyd!,!YDYHEJLDM!,!XZQDM!)",
                                             expression_type="PYTHON3",
                                             code_block=check_used_land_codebook
                                             )
         elif plan_across_shoreline == 0:
             check_used_land_codebook = """
-def check_used_land(jsyd,ydyhfldm):
-    if jsyd == 1 and ydyhfldm[:2] not in ['07','08','09','10','11','12','13','14','15','16','17','18','19','20','21','22','24']:
+def check_used_land(jsyd,ydyhfldm,xzqdm):
+    if jsyd == 1 and xzqdm in ['440802','440803'] and ydyhfldm[:2] not in ['07','08','09','10','11','12','13','14','15','16','17','18','19','20','21','22','24']:
         return "16"
     else:
         return ydyhfldm
                     """
             arcpy.management.CalculateField(single_part_plan, field="YDYHEJLDM",
-                                            expression="check_used_land(!jsyd!,!YDYHEJLDM!)",
+                                            expression="check_used_land(!jsyd!,!YDYHEJLDM!,!XZQDM!)",
                                             expression_type="PYTHON3",
                                             code_block=check_used_land_codebook
                                             )
 
-        arcpy.management.AddField(single_part_plan, field_name="COLOR", field_type="TEXT", field_length=4)
-        color_codebook = """
-def color(DM):
-    if DM[:2] in ['08', '10', '11', '14']:
-        return DM
-    elif DM in ['0701', '0702']:
-        return '0701'
-    elif DM in ['0703', '0704']:
-        return '0703'
-    elif DM in ['1202', '1205', '1207']:
-        return DM
-    else:
-        return DM[:2]
-        """
-        arcpy.management.CalculateField(single_part_plan, field="COLOR", expression="color(!YDYHEJLDM!)",
-                                        expression_type="PYTHON3", code_block=color_codebook)
-        print("Process21/28: 补充上色字段(COLOR)")
+        #         arcpy.management.AddField(single_part_plan, field_name="COLOR", field_type="TEXT", field_length=4)
+        #         color_codebook = """
+        # def color(DM):
+        #     if DM[:2] in ['08', '10', '11', '14']:
+        #         return DM
+        #     elif DM in ['0701', '0702']:
+        #         return '0701'
+        #     elif DM in ['0703', '0704']:
+        #         return '0703'
+        #     elif DM in ['1202', '1205', '1207']:
+        #         return DM
+        #     else:
+        #         return DM[:2]
+        #         """
+        #         arcpy.management.CalculateField(single_part_plan, field="COLOR", expression="color(!YDYHEJLDM!)",
+        #                                         expression_type="PYTHON3", code_block=color_codebook)
+        #         print("Process21/28: 补充上色字段(COLOR)")
 
         arcpy.management.AddField(single_part_plan, field_name="GHZT", field_type="TEXT", field_length=2)
         GHZT_codebook = """
@@ -471,7 +475,7 @@ def czc(czcsx,ydyh,kfbj,bz):
         elif ydyh[:2] in ['07','08','09','10','11','12','13','14','16'] and ydyh not in ['0703','1002','1003','1201','1202','1203','1204','1205','1206','1311','1312']:
             return '10'
         elif ydyh[:2] == '15' or ydyh in ['1002','1003','1201','1202','1203','1204','1205','1206','1311','1312']:
-            return  None
+            return  '10'
         elif czcsx in ['20']:
             return '20'
         elif ydyh == '0703':
@@ -490,12 +494,13 @@ def czc(czcsx,ydyh,kfbj,bz):
         else:
             return None
         """
-        arcpy.management.CalculateField(single_part_plan, field="CZCSX", expression="czc(!CZCSX1!,!YDYHFLDM!,!kfbj!,!BZ!)",
+        arcpy.management.CalculateField(single_part_plan, field="CZCSX",
+                                        expression="czc(!CZCSX1!,!YDYHFLDM!,!kfbj!,!czc!)",
                                         expression_type="PYTHON3",
                                         code_block=czc_codebook)
         print("Process26/28: 补充城镇村属性码(CZCSX)")
 
-        complete_plan = os.path.join(output_path, "complete_plan_20231008")
+        complete_plan = os.path.join(output_path, "complete_plan_20231116")
         arcpy.management.AddField(single_part_plan, field_name="YDYHFLMC", field_type="TEXT", field_length=50)
         arcpy.MakeFeatureLayer_management(single_part_plan, "plan_lyr")
         arcpy.JoinField_management("plan_lyr", "YDYHFLDM", dm2name_table, "dm")

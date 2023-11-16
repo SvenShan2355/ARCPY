@@ -6,6 +6,7 @@ import os
 import arcpy
 from arcpy import analysis
 from arcpy import management
+import math
 from arcpy import edit
 
 
@@ -49,9 +50,11 @@ def eliminate_under_200(input_file, styn, output_file, jsyd):
         nc = r'C:\\TEMP_GDB.gdb\\nc'
         fjs = r'C:\\TEMP_GDB.gdb\\fjs'
 
-        arcpy.analysis.Select(outside_styn, cz, r"CZCSX = '10' Or ((YDYHFLDM LIKE '12%' Or YDYHFLDM LIKE '15%') And CZCSX IS NULL)")
+        arcpy.analysis.Select(outside_styn, cz,
+                              r"CZCSX = '10' Or ((YDYHFLDM LIKE '12%' Or YDYHFLDM LIKE '15%') And CZCSX IS NULL)")
         arcpy.analysis.Select(outside_styn, nc, r"CZCSX = '20'")
-        arcpy.analysis.Select(outside_styn, fjs, r"CZCSX IS NULL AND YDYHFLDM NOT LIKE '12%' AND YDYHFLDM NOT LIKE '15%'")
+        arcpy.analysis.Select(outside_styn, fjs,
+                              r"CZCSX IS NULL AND YDYHFLDM NOT LIKE '12%' AND YDYHFLDM NOT LIKE '15%'")
 
         cz1 = r'C:\\TEMP_GDB.gdb\\cz1'
         cz2 = r'C:\\TEMP_GDB.gdb\\cz2'
@@ -130,3 +133,54 @@ def eliminate_under_200(input_file, styn, output_file, jsyd):
 
         arcpy.management.Merge([stynw, inside_styn3], output_file)
 
+
+def check_by_cursor(input_feature, output_feature_name, min_area=200):
+    merge_features = []
+    processed_features = set()
+
+    fields = [feild.name for feild in arcpy.ListFields(input_feature) if not feild.required]
+    czc_index = fields.index("CZCSX")
+    bz_index = fields.index("BZ")
+
+    with arcpy.da.SearchCursor(input_feature, ["OID@", "SHAPE@"] + fields) as cursor:
+        for row in cursor:
+            feature_id = row[0]
+            feature_shape = row[1]
+            feature_area = feature_shape.getArea("GEODESIC")
+            feature_czc = row[czc_index+2]
+            feature_bz = row[bz_index+2]
+            print(row,feature_area)
+            if feature_area > min_area:
+                with arcpy.da.SearchCursor(input_feature, ["OID@", "SHAPE@"] + fields,
+                                           f"OBJECTID <> {feature_id} AND SHAPE.STIntersects({feature_shape})='t'")as sub_cursor:
+                    for sub_row in sub_cursor:
+                        sub_feature_id = sub_row[0]
+                        sub_feature_shape = sub_row[1]
+                        sub_feature_area = sub_feature_shape.getArea("GEODESIC")
+                        sub_feature_czc = sub_row[czc_index+2]
+                        sub_feature_bz = sub_row[bz_index+2]
+                        if sub_feature_area < min_area and sub_feature_czc == feature_czc and sub_feature_bz == feature_bz:
+                            feature_shape = feature_shape.union(sub_feature_shape)
+                            processed_features.add(sub_feature_id)
+                feature_row = [feature_id, feature_shape] + list(row[3:])
+                merge_features.append(feature_row)
+            else:
+                feature_row = [feature_id, feature_shape] + list(row[3:])
+                merge_features.append(feature_row)
+        for row in merge_features:
+            feature_id = row[0]
+            if feature_id in processed_features:
+                merge_features.remove(row)
+    print(merge_features)
+
+    arcpy.CreateFeatureclass_management(r"E:\工程文件\2_湛江市国土空间总体规划（2020-2035年）\过程文件\矢量\Arcpy_Output_Database.gdb",
+                                        output_feature_name, "POLYGON", spatial_reference=input_feature)
+
+    with arcpy.da.InsertCursor(
+            os.path.join(r"E:\工程文件\2_湛江市国土空间总体规划（2020-2035年）\过程文件\矢量\Arcpy_Output_Database.gdb", output_feature_name),
+            ["SHAPE@"] + fields) as cursor:
+        for row in merge_features:
+            feature_shape = row[1]
+            feature_fields = row[2:]
+            if feature_shape is not None:
+                cursor.insertRow([feature_shape]+feature_fields)
