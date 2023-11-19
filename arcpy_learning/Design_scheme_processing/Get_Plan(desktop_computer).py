@@ -37,13 +37,10 @@ if __name__ == '__main__':
     # )
 
     # 消除碎图斑
-    # eliminate_under_200.eliminate_under_200(input_file=r'E:\DataBase_本地更新库\湛江市国土空间规划\Output_Database.gdb\complete_plan_20231031_xs',
-    #                                         styn=r'E:\DataBase_共享总库\ZJ\04_三区三线试划\成果_20221110-广东省“三区三线”划定成果矢量数据（部下发封库版）\三区三线下发版.gdb\STBHYN_d',
-    #                                         output_file=r'E:\DataBase_本地更新库\湛江市国土空间规划\Output_Database.gdb\complete_plan_20231031_xs_E',
-    #                                         jsyd=r'E:\DataBase_本地更新库\湛江市国土空间规划\湛江市国土空间规划.gdb\变更调查2020建设用地')
     eliminate_under_200.check_by_cursor(
-        input_feature=r"C:\Users\Administrator\Documents\ArcGIS\Default.gdb\规划用地用海_Dissolv_MultipartToSi",
-        output_feature_name="complete_plan_20231116_ck_E")
+        input_feature=r"E:\工程文件\2_湛江市国土空间总体规划（2020-2035年）\成果文件\县级数据库\20231116\440802赤坎区县级国土空间总体规划电子成果_报审检查确认版\4矢量数据\440802赤坎区县级国土空间总体规划矢量数据.gdb\GHYDYH",
+        output_path=r"E:\工程文件\2_湛江市国土空间总体规划（2020-2035年）\过程文件\矢量\Arcpy_Output_Database.gdb",
+        output_feature_name="complete_plan_20231119_ck_E")
 
     '''
     执行完成后需要的步骤：
