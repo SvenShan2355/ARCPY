@@ -468,23 +468,25 @@ def NIR_codebook(ydyh):
         print("Process25/28: 备注新型产业用地")
 
         czc_codebook = """
-def czc(czcsx,ydyh,kfbj,bz):
+def czc(czcsx,ydyh,kfbj,czc,bz):
     if kfbj == 1:
-        if bz in ('10','20'):
-            return bz
+        if czc in ('10','20'):
+            return czc
         elif ydyh[:2] in ['07','08','09','10','11','12','13','14','16'] and ydyh not in ['0703','1002','1003','1201','1202','1203','1204','1205','1206','1311','1312']:
             return '10'
+        # 开发边界内区域用地
         elif ydyh[:2] == '15' or ydyh in ['1002','1003','1201','1202','1203','1204','1205','1206','1311','1312']:
             return  '10'
+        # 开发边界内村庄用地
         elif czcsx in ['20']:
-            return '20'
+            return '10'
         elif ydyh == '0703':
             return '10'
         else:
             return None
     else:
-        if bz in ('10','20'):
-            return bz
+        if czc in ('10','20'):
+            return czc
         elif (czcsx == '20' and ydyh != '1207') or bz == '乡村振兴点状供地':
             return '20'
         elif ydyh[:2] == '15' or ydyh in ['1002','1003','1201','1202','1203','1204','1205','1206','1311','1312']:
@@ -495,7 +497,7 @@ def czc(czcsx,ydyh,kfbj,bz):
             return None
         """
         arcpy.management.CalculateField(single_part_plan, field="CZCSX",
-                                        expression="czc(!CZCSX1!,!YDYHFLDM!,!kfbj!,!czc!)",
+                                        expression="czc(!CZCSX1!,!YDYHFLDM!,!kfbj!,!czc!,!BZ!)",
                                         expression_type="PYTHON3",
                                         code_block=czc_codebook)
         print("Process26/28: 补充城镇村属性码(CZCSX)")
