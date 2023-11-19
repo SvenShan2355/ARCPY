@@ -6,8 +6,6 @@ import os
 import arcpy
 from arcpy import analysis
 from arcpy import management
-import math
-from arcpy import edit
 
 
 def eliminate_under_200(input_file, styn, output_file, jsyd):
@@ -134,53 +132,70 @@ def eliminate_under_200(input_file, styn, output_file, jsyd):
         arcpy.management.Merge([stynw, inside_styn3], output_file)
 
 
-def check_by_cursor(input_feature, output_feature_name, min_area=200):
+def check_by_cursor(input_feature, output_path, output_feature_name, min_area=200):
     merge_features = []
     processed_features = set()
 
     fields = [feild.name for feild in arcpy.ListFields(input_feature) if not feild.required]
+    fileds_info = [[feild.name, 'TEXT' if feild.type.upper()=='STRING' else feild.type.upper(), feild.aliasName, feild.length,'',''] for feild in arcpy.ListFields(input_feature)
+                   if not feild.required]
+    print(fields)
+    print(fileds_info)
     czc_index = fields.index("CZCSX")
     bz_index = fields.index("BZ")
 
-    with arcpy.da.SearchCursor(input_feature, ["OID@", "SHAPE@"] + fields) as cursor:
+    input_lyr = arcpy.MakeFeatureLayer_management(input_feature, "input_lyr")
+    intersect_lyr = arcpy.MakeFeatureLayer_management(input_feature, "intersect_lyr")
+
+    with arcpy.da.SearchCursor(input_lyr, ["OID@", "SHAPE@"] + fields) as cursor:
         for row in cursor:
             feature_id = row[0]
             feature_shape = row[1]
             feature_area = feature_shape.getArea("GEODESIC")
-            feature_czc = row[czc_index+2]
-            feature_bz = row[bz_index+2]
-            print(row,feature_area)
+            feature_czc = row[czc_index + 2]
+            feature_bz = row[bz_index + 2]
             if feature_area > min_area:
-                with arcpy.da.SearchCursor(input_feature, ["OID@", "SHAPE@"] + fields,
-                                           f"OBJECTID <> {feature_id} AND SHAPE.STIntersects({feature_shape})='t'")as sub_cursor:
-                    for sub_row in sub_cursor:
-                        sub_feature_id = sub_row[0]
-                        sub_feature_shape = sub_row[1]
-                        sub_feature_area = sub_feature_shape.getArea("GEODESIC")
-                        sub_feature_czc = sub_row[czc_index+2]
-                        sub_feature_bz = sub_row[bz_index+2]
-                        if sub_feature_area < min_area and sub_feature_czc == feature_czc and sub_feature_bz == feature_bz:
-                            feature_shape = feature_shape.union(sub_feature_shape)
-                            processed_features.add(sub_feature_id)
-                feature_row = [feature_id, feature_shape] + list(row[3:])
+                check = 1
+                while check == 1:
+                    check = 0
+                    arcpy.SelectLayerByLocation_management(intersect_lyr, 'intersect', feature_shape)
+                    with arcpy.da.SearchCursor(intersect_lyr, ["OID@", "SHAPE@"] + fields)as sub_cursor:
+                        for sub_row in sub_cursor:
+                            sub_feature_id = sub_row[0]
+                            sub_feature_shape = sub_row[1]
+                            sub_feature_area = sub_feature_shape.getArea("GEODESIC")
+                            sub_feature_czc = sub_row[czc_index + 2]
+                            sub_feature_bz = sub_row[bz_index + 2]
+                            if feature_id != sub_feature_id and sub_feature_id not in processed_features and sub_feature_area < min_area and sub_feature_czc == feature_czc and sub_feature_bz == feature_bz:
+                                check = 1
+                                feature_shape = feature_shape.union(sub_feature_shape)
+                                processed_features.add(sub_feature_id)
+                                print("id:{},area:{}".format(feature_id, feature_area))
+                                print("sub_id:{},sub_area:{}".format(sub_feature_id, sub_feature_area))
+                    arcpy.SelectLayerByAttribute_management(intersect_lyr, "CLEAR_SELECTION")
+                feature_row = [feature_id, feature_shape] + list(row[2:])
                 merge_features.append(feature_row)
             else:
-                feature_row = [feature_id, feature_shape] + list(row[3:])
+                feature_row = [feature_id, feature_shape] + list(row[2:])
                 merge_features.append(feature_row)
+
+        insert_feature = []
         for row in merge_features:
             feature_id = row[0]
-            if feature_id in processed_features:
-                merge_features.remove(row)
-    print(merge_features)
+            if feature_id not in processed_features:
+                insert_feature.append(row)
 
-    arcpy.CreateFeatureclass_management(r"E:\工程文件\2_湛江市国土空间总体规划（2020-2035年）\过程文件\矢量\Arcpy_Output_Database.gdb",
-                                        output_feature_name, "POLYGON", spatial_reference=input_feature)
+    if arcpy.Exists(os.path.join(output_path, output_feature_name)) is False:
+        arcpy.CreateFeatureclass_management(output_path, output_feature_name, "POLYGON",
+                                            spatial_reference=input_feature)
+        arcpy.management.AddFields(os.path.join(output_path, output_feature_name),
+                                   fileds_info)
 
     with arcpy.da.InsertCursor(
-            os.path.join(r"E:\工程文件\2_湛江市国土空间总体规划（2020-2035年）\过程文件\矢量\Arcpy_Output_Database.gdb", output_feature_name),
+            os.path.join(output_path, output_feature_name),
             ["SHAPE@"] + fields) as cursor:
-        for row in merge_features:
-            feature_shape = row[1]
-            feature_fields = row[2:]
+        for feature in insert_feature:
+            feature_shape = feature[1]
+            feature_fields = feature[2:]
             if feature_shape is not None:
-                cursor.insertRow([feature_shape]+feature_fields)
+                cursor.insertRow([feature_shape] + feature_fields)
