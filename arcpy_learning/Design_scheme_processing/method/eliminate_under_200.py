@@ -177,6 +177,7 @@ def check_by_cursor(input_feature, output_path, output_feature_name, min_area=20
                             sub_feature_czc = sub_row[czc_index + 2]
                             sub_feature_bz = sub_row[bz_index + 2]
                             sub_feature_fldm = sub_row[dm_index + 2]
+                            print("周边图斑面积{}平方米".format(sub_feature_area))
                             if feature_id != sub_feature_id and sub_feature_id not in processed_features and sub_feature_area < min_area and (
                                     (feature_bz == "建设用地" and sub_feature_bz == "建设用地" and (
                                             feature_czc == "10" or (feature_czc == sub_feature_czc))) or
@@ -191,10 +192,10 @@ def check_by_cursor(input_feature, output_path, output_feature_name, min_area=20
                                 print("被消除图斑id:{},sub_area:{}".format(sub_feature_id, sub_feature_area))
                                 print("已消除图斑{}个".format(eliminate_num))
                                 arcpy.SelectLayerByAttribute_management(intersect_lyr, "CLEAR_SELECTION")  # 清空缓存图层
-                feature_row = [feature_id, feature_shape] + list(row[2:])
-                merge_features.append(feature_row)
-                check_num = check_num + 1
-                print("已检查图斑{}个".format(check_num))
+            feature_row = [feature_id, feature_shape] + list(row[2:])
+            merge_features.append(feature_row)
+            check_num = check_num + 1
+            print("已检查图斑{}个".format(check_num))
 
     # 选择未被processed_feature列表标记处理过的内容加入insert_feature列表
     insert_feature = []

@@ -294,7 +294,8 @@ def road_sea(ydyh,sea,jsyd):
             print("Process15/28: 擦除需要替换部分方案")
 
             replaced_plan = "C:\\TEMP_GDB.gdb\\replaced_plan"
-            arcpy.management.Merge([inside_ZXCQ_plan_renew_road_unreplace_part, entirety_replace_part_in_range], replaced_plan)
+            arcpy.management.Merge([inside_ZXCQ_plan_renew_road_unreplace_part, entirety_replace_part_in_range],
+                                   replaced_plan)
             print("Process16/28: 将需要替换的部分与其他部分合成完整方案")
 
             plan_by_zone = "C:\\TEMP_GDB.gdb\\plan_by_zone"
@@ -326,18 +327,6 @@ def road_sea(ydyh,sea,jsyd):
         '''
         ————————————————字段整理部分————————————————
         '''
-        #         traffic_codebook = """
-        # def traffic(DM):
-        #     if DM is None:
-        #         return "1207"
-        #     else:
-        #         return DM
-        #             """
-        #         arcpy.management.CalculateField(single_part_plan, field="YDYHEJLDM", expression="traffic(!YDYHEJLDM!)",
-        #                                         expression_type="PYTHON3", code_block=traffic_codebook)
-        #         arcpy.management.CalculateField(single_part_plan, field="YDYHYJLDM",
-        #                                         expression="!YDYHEJLDM![:2]", expression_type="PYTHON3")
-        #         print("Process20/28: 补充交通缺失字段")
 
         if plan_across_shoreline == 1:
             check_used_land_codebook = """
@@ -365,24 +354,6 @@ def check_used_land(jsyd,ydyhfldm,xzqdm):
                                             expression_type="PYTHON3",
                                             code_block=check_used_land_codebook
                                             )
-
-        #         arcpy.management.AddField(single_part_plan, field_name="COLOR", field_type="TEXT", field_length=4)
-        #         color_codebook = """
-        # def color(DM):
-        #     if DM[:2] in ['08', '10', '11', '14']:
-        #         return DM
-        #     elif DM in ['0701', '0702']:
-        #         return '0701'
-        #     elif DM in ['0703', '0704']:
-        #         return '0703'
-        #     elif DM in ['1202', '1205', '1207']:
-        #         return DM
-        #     else:
-        #         return DM[:2]
-        #         """
-        #         arcpy.management.CalculateField(single_part_plan, field="COLOR", expression="color(!YDYHEJLDM!)",
-        #                                         expression_type="PYTHON3", code_block=color_codebook)
-        #         print("Process21/28: 补充上色字段(COLOR)")
 
         arcpy.management.AddField(single_part_plan, field_name="GHZT", field_type="TEXT", field_length=2)
         GHZT_codebook = """
@@ -502,7 +473,20 @@ def czc(czcsx,ydyh,kfbj,czc,bz):
                                         code_block=czc_codebook)
         print("Process26/28: 补充城镇村属性码(CZCSX)")
 
-        complete_plan = os.path.join(output_path, "complete_plan_20231119")
+        bz_code = """
+def bz(bz,fldm):
+    if bz=='':
+        if fldm[:2] in ['07','08','09','10','11','12','13','14','15','16']:
+            return '建设用地'
+        else:
+            return '非建设用地'
+    else:
+        return bz
+        """
+        arcpy.management.CalculateField(single_part_plan, field='BZ', expression="bz(!BZ!,!YDYHFLDM!)",
+                                        expression_type="PYTHON3", code_block=bz_code)
+
+        complete_plan = os.path.join(output_path, "complete_plan_20231207")
         arcpy.management.AddField(single_part_plan, field_name="YDYHFLMC", field_type="TEXT", field_length=50)
         arcpy.MakeFeatureLayer_management(single_part_plan, "plan_lyr")
         arcpy.JoinField_management("plan_lyr", "YDYHFLDM", dm2name_table, "dm")
