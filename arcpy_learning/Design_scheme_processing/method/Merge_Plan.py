@@ -261,6 +261,8 @@ def reset_road_in_sea(DM):
 def road_sea(ydyh,sea,jsyd):
     if ydyh == "1202":
         return "1202"
+    elif ydyh == "2003":
+        return "2003"
     elif sea == 1 and jsyd != 1:
         return "2003"
     else:
@@ -486,7 +488,7 @@ def bz(bz,fldm):
         arcpy.management.CalculateField(single_part_plan, field='BZ', expression="bz(!BZ!,!YDYHFLDM!)",
                                         expression_type="PYTHON3", code_block=bz_code)
 
-        complete_plan = os.path.join(output_path, "complete_plan_20231207")
+        complete_plan = os.path.join(output_path, "complete_plan_20231212")
         arcpy.management.AddField(single_part_plan, field_name="YDYHFLMC", field_type="TEXT", field_length=50)
         arcpy.MakeFeatureLayer_management(single_part_plan, "plan_lyr")
         arcpy.JoinField_management("plan_lyr", "YDYHFLDM", dm2name_table, "dm")
