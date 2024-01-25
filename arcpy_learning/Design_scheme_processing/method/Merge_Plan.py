@@ -103,29 +103,39 @@ def Model_For_Part_Entirety_Replace(bgdc, plan, sea, sea_range, road, range, ent
         # Create the required FieldMap and FieldMappings objects
         infile1 = inside_ZXCQ_unplanned_land_and_sea
         infile2 = inside_ZXCQ_plan_land
+
         fm_YDYHYJLDM = arcpy.FieldMap()
         fm_YDYHEJLDM = arcpy.FieldMap()
         fm_YDYHSJLDM = arcpy.FieldMap()
         fm_YSDM = arcpy.FieldMap()
+        fm_CZC = arcpy.FieldMap()
         fm_BZ = arcpy.FieldMap()
+
         fms = arcpy.FieldMappings()
         # Get the field names of vegetation type and diameter for both original
         infile1_YDYHYJLDM = 'YDYHYJLDM'
         infile1_YDYHEJLDM = 'YDYHEJLDM'
         infile1_YDYHSJLDM = 'YDYHSJLDM'
         infile1_YSDM = 'YSDM'
+
         infile2_YDYHYJLDM = 'YDYHYJLDM'
         infile2_YDYHEJLDM = 'YDYHEJLDM'
         infile2_YDYHSJLDM = 'YDYHSJLDM'
+        infile2_CZC = 'czc'
         infile2_BZ = 'BZ'
         # Add fields to their corresponding FieldMap objects
         fm_YDYHYJLDM.addInputField(infile1, infile1_YDYHYJLDM)
         fm_YDYHYJLDM.addInputField(infile2, infile2_YDYHYJLDM)
+
         fm_YDYHEJLDM.addInputField(infile1, infile1_YDYHEJLDM)
         fm_YDYHEJLDM.addInputField(infile2, infile2_YDYHEJLDM)
+
         fm_YDYHSJLDM.addInputField(infile1, infile1_YDYHSJLDM)
         fm_YDYHSJLDM.addInputField(infile2, infile2_YDYHSJLDM)
+
         fm_YSDM.addInputField(infile1, infile1_YSDM)
+
+        fm_CZC.addInputField(infile2,infile2_CZC)
         fm_BZ.addInputField(infile2, infile2_BZ)
         # Set the output field properties for both FieldMap objects
         YDYHYJLDM = fm_YDYHYJLDM.outputField
@@ -133,32 +143,43 @@ def Model_For_Part_Entirety_Replace(bgdc, plan, sea, sea_range, road, range, ent
         YDYHYJLDM.aliasName = 'YDYHYJLDM'
         YDYHYJLDM.length = 2
         fm_YDYHYJLDM.outputField = YDYHYJLDM
+
         YDYHEJLDM = fm_YDYHEJLDM.outputField
         YDYHEJLDM.name = 'YDYHEJLDM'
         YDYHEJLDM.aliasName = 'YDYHEJLDM'
         YDYHEJLDM.length = 4
         fm_YDYHEJLDM.outputField = YDYHEJLDM
+
         YDYHSJLDM = fm_YDYHSJLDM.outputField
         YDYHSJLDM.name = 'YDYHSJLDM'
         YDYHSJLDM.aliasName = 'YDYHSJLDM'
         YDYHSJLDM.length = 6
         fm_YDYHSJLDM.outputField = YDYHSJLDM
+
         YSDM = fm_YSDM.outputField
         YSDM.name = 'YSDM'
         YSDM.aliasName = 'YSDM'
         YSDM.length = 10
         fm_YSDM.outputField = YSDM
+
         BZ = fm_BZ.outputField
         BZ.name = 'BZ'
         BZ.aliasName = 'BZ'
         BZ.length = 255
         fm_BZ.outputField = BZ
+
+        CZC = fm_CZC.outputField
+        CZC.name = 'czc'
+        CZC.aliasName = 'czc'
+        CZC.length = 2
+        fm_CZC.outputField = CZC
         # Add the FieldMap objects to the FieldMappings object
         fms.addFieldMap(fm_YDYHYJLDM)
         fms.addFieldMap(fm_YDYHEJLDM)
         fms.addFieldMap(fm_YDYHSJLDM)
         fms.addFieldMap(fm_YSDM)
         fms.addFieldMap(fm_BZ)
+        fms.addFieldMap(fm_CZC)
         print("Process6/28: 维护合并字段")
         arcpy.management.Merge([inside_ZXCQ_unplanned_land_and_sea, inside_ZXCQ_plan_land], inside_ZXCQ_Cland_and_Pland,
                                fms)
@@ -488,7 +509,7 @@ def bz(bz,fldm):
         arcpy.management.CalculateField(single_part_plan, field='BZ', expression="bz(!BZ!,!YDYHFLDM!)",
                                         expression_type="PYTHON3", code_block=bz_code)
 
-        complete_plan = os.path.join(output_path, "complete_plan_20231212")
+        complete_plan = os.path.join(output_path, "complete_plan_20240125_1")
         arcpy.management.AddField(single_part_plan, field_name="YDYHFLMC", field_type="TEXT", field_length=50)
         arcpy.MakeFeatureLayer_management(single_part_plan, "plan_lyr")
         arcpy.JoinField_management("plan_lyr", "YDYHFLDM", dm2name_table, "dm")
