@@ -280,10 +280,8 @@ def reset_road_in_sea(DM):
         # arcpy.management.AddField(road_ii, field_name="YDYHEJLDM", field_type="TEXT", field_length=4)
         road_sea = '''
 def road_sea(ydyh,sea,jsyd):
-    if ydyh == "1202":
-        return "1202"
-    elif ydyh == "2003":
-        return "2003"
+    if ydyh in ("1202","2003"):
+        return ydyh
     elif sea == 1 and jsyd != 1:
         return "2003"
     else:
