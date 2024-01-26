@@ -110,7 +110,11 @@ def Model_For_Part_Entirety_Replace(bgdc, plan, sea, sea_range, road, range, ent
         fm_YSDM = arcpy.FieldMap()
         fm_CZC = arcpy.FieldMap()
         fm_BZ = arcpy.FieldMap()
+<<<<<<< Updated upstream
 
+=======
+        fm_CZC = arcpy.FieldMap()
+>>>>>>> Stashed changes
         fms = arcpy.FieldMappings()
         # Get the field names of vegetation type and diameter for both original
         infile1_YDYHYJLDM = 'YDYHYJLDM'
@@ -123,6 +127,8 @@ def Model_For_Part_Entirety_Replace(bgdc, plan, sea, sea_range, road, range, ent
         infile2_YDYHSJLDM = 'YDYHSJLDM'
         infile2_CZC = 'czc'
         infile2_BZ = 'BZ'
+        infile2_CZC = 'czc'
+
         # Add fields to their corresponding FieldMap objects
         fm_YDYHYJLDM.addInputField(infile1, infile1_YDYHYJLDM)
         fm_YDYHYJLDM.addInputField(infile2, infile2_YDYHYJLDM)
@@ -137,6 +143,8 @@ def Model_For_Part_Entirety_Replace(bgdc, plan, sea, sea_range, road, range, ent
 
         fm_CZC.addInputField(infile2,infile2_CZC)
         fm_BZ.addInputField(infile2, infile2_BZ)
+        fm_CZC.addInputField(infile2, infile2_CZC)
+
         # Set the output field properties for both FieldMap objects
         YDYHYJLDM = fm_YDYHYJLDM.outputField
         YDYHYJLDM.name = 'YDYHYJLDM'
@@ -168,7 +176,11 @@ def Model_For_Part_Entirety_Replace(bgdc, plan, sea, sea_range, road, range, ent
         BZ.length = 255
         fm_BZ.outputField = BZ
 
+<<<<<<< Updated upstream
         CZC = fm_CZC.outputField
+=======
+        CZC = fm_BZ.outputField
+>>>>>>> Stashed changes
         CZC.name = 'czc'
         CZC.aliasName = 'czc'
         CZC.length = 2
@@ -280,12 +292,10 @@ def reset_road_in_sea(DM):
         # arcpy.management.AddField(road_ii, field_name="YDYHEJLDM", field_type="TEXT", field_length=4)
         road_sea = '''
 def road_sea(ydyh,sea,jsyd):
-    if ydyh in ("1202","2003"):
-        return ydyh
-    elif sea == 1 and jsyd != 1:
-        return "2003"
+    if sea == 1:
+        return '2003' 
     else:
-        return "1207"
+        return ydyh
         '''
         arcpy.management.CalculateField(road_ii, field="YDYHEJLDM", expression="road_sea(!YDYHEJLDM!,!sea!,!jsyd!)",
                                         code_block=road_sea,
@@ -352,7 +362,7 @@ def road_sea(ydyh,sea,jsyd):
         if plan_across_shoreline == 1:
             check_used_land_codebook = """
 def check_used_land(jsyd,ydyhfldm,xzqdm):
-    if jsyd == 1 and xzqdm in ['440802','440803'] and ydyhfldm[:2] not in ['07','08','09','10','11','12','13','14','15','16','17','20']:
+    if jsyd == 1 and xzqdm in ['440802','440803'] and ydyhfldm[:2] not in ['07','08','09','10','11','12','13','14','15','16','17','18','19','20','21','22']:
         return "16"
     else:
         return ydyhfldm
@@ -470,7 +480,7 @@ def czc(czcsx,ydyh,kfbj,czc,bz):
         elif ydyh[:2] == '15' or ydyh in ['1002','1003','1201','1202','1203','1204','1205','1206','1311','1312']:
             return  '10'
         # 开发边界内村庄用地
-        elif czcsx in ['20']:
+        elif czcsx in ['20'] and ydyh[:2] in ['07','08','09','10','11','12','13','14','16']:
             return '10'
         elif ydyh == '0703':
             return '10'
@@ -479,7 +489,7 @@ def czc(czcsx,ydyh,kfbj,czc,bz):
     else:
         if czc in ('10','20'):
             return czc
-        elif (czcsx == '20' and ydyh != '1207') or bz == '乡村振兴点状供地':
+        elif (czcsx == '20' and ydyh[:2] in ['07','08','09','10','11','12','13','14','16'] and ydyh != '1207') or bz == '乡村振兴点状供地':
             return '20'
         elif ydyh[:2] == '15' or ydyh in ['1002','1003','1201','1202','1203','1204','1205','1206','1311','1312']:
             return None
@@ -507,7 +517,11 @@ def bz(bz,fldm):
         arcpy.management.CalculateField(single_part_plan, field='BZ', expression="bz(!BZ!,!YDYHFLDM!)",
                                         expression_type="PYTHON3", code_block=bz_code)
 
+<<<<<<< Updated upstream
         complete_plan = os.path.join(output_path, "complete_plan_20240125_1")
+=======
+        complete_plan = os.path.join(output_path, "complete_plan_20240103")
+>>>>>>> Stashed changes
         arcpy.management.AddField(single_part_plan, field_name="YDYHFLMC", field_type="TEXT", field_length=50)
         arcpy.MakeFeatureLayer_management(single_part_plan, "plan_lyr")
         arcpy.JoinField_management("plan_lyr", "YDYHFLDM", dm2name_table, "dm")
