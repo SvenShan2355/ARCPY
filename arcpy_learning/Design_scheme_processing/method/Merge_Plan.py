@@ -110,11 +110,6 @@ def Model_For_Part_Entirety_Replace(bgdc, plan, sea, sea_range, road, range, ent
         fm_YSDM = arcpy.FieldMap()
         fm_CZC = arcpy.FieldMap()
         fm_BZ = arcpy.FieldMap()
-<<<<<<< Updated upstream
-
-=======
-        fm_CZC = arcpy.FieldMap()
->>>>>>> Stashed changes
         fms = arcpy.FieldMappings()
         # Get the field names of vegetation type and diameter for both original
         infile1_YDYHYJLDM = 'YDYHYJLDM'
@@ -125,7 +120,6 @@ def Model_For_Part_Entirety_Replace(bgdc, plan, sea, sea_range, road, range, ent
         infile2_YDYHYJLDM = 'YDYHYJLDM'
         infile2_YDYHEJLDM = 'YDYHEJLDM'
         infile2_YDYHSJLDM = 'YDYHSJLDM'
-        infile2_CZC = 'czc'
         infile2_BZ = 'BZ'
         infile2_CZC = 'czc'
 
@@ -143,7 +137,6 @@ def Model_For_Part_Entirety_Replace(bgdc, plan, sea, sea_range, road, range, ent
 
         fm_CZC.addInputField(infile2,infile2_CZC)
         fm_BZ.addInputField(infile2, infile2_BZ)
-        fm_CZC.addInputField(infile2, infile2_CZC)
 
         # Set the output field properties for both FieldMap objects
         YDYHYJLDM = fm_YDYHYJLDM.outputField
@@ -176,11 +169,8 @@ def Model_For_Part_Entirety_Replace(bgdc, plan, sea, sea_range, road, range, ent
         BZ.length = 255
         fm_BZ.outputField = BZ
 
-<<<<<<< Updated upstream
+
         CZC = fm_CZC.outputField
-=======
-        CZC = fm_BZ.outputField
->>>>>>> Stashed changes
         CZC.name = 'czc'
         CZC.aliasName = 'czc'
         CZC.length = 2
@@ -517,11 +507,7 @@ def bz(bz,fldm):
         arcpy.management.CalculateField(single_part_plan, field='BZ', expression="bz(!BZ!,!YDYHFLDM!)",
                                         expression_type="PYTHON3", code_block=bz_code)
 
-<<<<<<< Updated upstream
         complete_plan = os.path.join(output_path, "complete_plan_20240125_1")
-=======
-        complete_plan = os.path.join(output_path, "complete_plan_20240103")
->>>>>>> Stashed changes
         arcpy.management.AddField(single_part_plan, field_name="YDYHFLMC", field_type="TEXT", field_length=50)
         arcpy.MakeFeatureLayer_management(single_part_plan, "plan_lyr")
         arcpy.JoinField_management("plan_lyr", "YDYHFLDM", dm2name_table, "dm")
